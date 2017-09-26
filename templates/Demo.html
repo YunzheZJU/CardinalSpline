@@ -1,10 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Demo</title>
+
+    <link type="text/css" href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
+
+    <!--[if lt IE 9]>
+    <script type="text/javascript" src="{{ url_for('static', filename='html5shiv.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='respond.min.js') }}"></script>
+    <![endif]-->
 </head>
 <body>
-$END$
+<h1>Hello, this is a demo.</h1>
+<canvas id="canvas" width="800" height="600" style="border: 1px solid #000000;">
+    <h1>HTML5 Canvas is not supported in your browser!</h1>
+</canvas>
+
+<script type="text/javascript" src="{{ url_for('static', filename='jquery-3.2.1.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='popper.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='jcanvas.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='test.js') }}"></script>
 </body>
 </html>
