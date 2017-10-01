@@ -4,7 +4,7 @@
 
 'use strict';
 // Test canvas
-var $canvas = $('#canvas');
+var $canvas = $('#splinecanvas');
 var canvas = $canvas[0];
 var circle_x = 400;
 var circle_y = 300;
