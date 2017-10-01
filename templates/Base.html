@@ -20,15 +20,11 @@
 <body>
     <div id="header">
         {% set navigation_bar = [
-        ('effect', 'Effect'),
-        ('live2d', 'Saya'),
-        ('spline', 'CA: Spline'),
-        ('taobao', 'DMD: Taobao'),
-        ('dam', 'DAM: Name undefined')
+        ('demo', 'CA: Spline')
         ] -%}
         {% set active_page = active_page|default('index') -%}
         <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-            <a class="navbar-brand" href="{{ url_for('home') }}">CallHub</a>
+            <a class="navbar-brand" href="#">CallHub</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>

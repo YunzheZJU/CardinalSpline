@@ -3,7 +3,7 @@
  */
 
 'use strict';
-// Test canvas
+// Test canvas_spline
 var $canvas = $('#splinecanvas');
 var canvas = $canvas[0];
 var circle_x = 400;
