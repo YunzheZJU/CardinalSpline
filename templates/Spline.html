@@ -9,31 +9,32 @@
 
 {% block content %}
         <h1>Hello, this is a demo.</h1>
-        <canvas id="splinecanvas" width="800" height="600" style="border: 1px solid #000000;">
+        <canvas id="splinecanvas" width="1200" height="600" style="border: 1px solid #000000;position: relative;
+        left: 50%;transform: translate(-50%);margin-top:10px">
             <h1>HTML5 Canvas is not supported in your browser!</h1>
         </canvas>
         <form class="form-horizontal" role="form">
-            <div style="float: left;" class="col-sm-8">
-                <div class="form-group">
-                    <label for="grain" class="col-sm-2 control-label">插值点数量</label>
-                    <div class="col-sm-6">
+            <div style="float: left;" class="col-sm-10">
+                <div class="form-group col-sm-6" style="float: left;">
+                    <label for="grain" class="col-sm-12 control-label">插值点数量</label>
+                    <div class="col-sm-12">
                         <input type="text" class="form-control col-sm-2" id="grain" placeholder="Grain" value="20">
-                        <div id="grainslider" style="margin-top: 15px;">
+                        <div id="grainslider" style="margin-top: 20px;">
                             <div id="grainhandle" class="ui-slider-handle"></div>
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <label for="tension" class="col-sm-2 control-label">张力数值</label>
-                    <div class="col-sm-6">
+                <div class="form-group col-sm-6" style="float: left;">
+                    <label for="tension" class="col-sm-12 control-label">张力数值</label>
+                    <div class="col-sm-12">
                         <input type="text" class="form-control col-sm-2" id="tension" placeholder="Tension" value="0.5">
-                        <div id="tensionslider" style="margin-top: 15px;">
+                        <div id="tensionslider" style="margin-top: 20px;">
                             <div id="tensionhandle" class="ui-slider-handle"></div>
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <div class="col-sm-offset-2 col-sm-10">
+                <div class="form-group" style="float: right;">
+                    <div class="col-sm-offset-2 col-sm-12">
                         <div class="checkbox">
                             <label>
                                 <input type="checkbox" id="checkbox">自动重绘曲线
@@ -42,15 +43,15 @@
                     </div>
                 </div>
             </div>
-            <div style="float: left;" class="col-sm-4">
-                <div class="form-group" style="float: left;">
-                    <div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-default" id="draw">绘制曲线</button>
+            <div style="float: left;" class="col-sm-2">
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <button type="submit" class="btn btn-primary" id="draw">绘制曲线</button>
                     </div>
                 </div>
-                <div class="form-group" style="float: left;">
-                    <div class="col-sm-offset-2 col-sm-10">
-                        <button type="submit" class="btn btn-default" id="clear">清除画布</button>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <button type="submit" class="btn btn-danger" id="clear">清除画布</button>
                     </div>
                 </div>
             </div>

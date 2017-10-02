@@ -8964,7 +8964,7 @@ $.effects.effect.puff = function( o, done ) {
 		};
 
 	$.extend( o, {
-		effect: "scale",
+		effect: "current_scale",
 		queue: false,
 		fade: true,
 		mode: mode,

@@ -167,12 +167,12 @@ let startEffect = function (num) {
 };
 
 window.addEventListener('load', startEffect(100));
-canvas_effect.onmousemove = function (e) {
+window.onmousemove = function (e) {
     e = e || window.event;
     cursor.x = e.clientX;
     cursor.y = e.clientY;
 };
-canvas_effect.onmouseout = function () {
+window.onmouseout = function () {
     cursor.x = null;
     cursor.y = null;
 };

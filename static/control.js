@@ -15,26 +15,13 @@ let line;
 let spline;
 let grain = 20;
 let tension = 0.5;
-let scale = 1;
+let current_scale = 1;
 let status = "DRAW";
 let offsetX = 0;
 let offsetY = 0;
 const MAX_SCALE = 2;
 const MIN_SCALE = 0.5;
 const colors = ['red', 'blue', 'yellow', 'orange', 'purple', 'green'];
-canvas_spline.width = window.innerWidth - 35;
-let centerX = canvas_spline.width / 2;
-resizeFnBox.push(function () {
-    canvas_spline.width = window.innerWidth - 35;
-    let alias = (canvas_spline.width / 2 - centerX) / 2;
-    offsetX -= alias;
-    console.log(offsetX);
-    centerX = canvas_spline.width / 2;
-    $canvas_spline.translateCanvas({
-        translateX: alias,
-        translateY: 0
-    }).drawLayers();
-});
 canvas_spline.addEventListener("wheel", mouseEvent, true);
 canvas_spline.addEventListener("mousedown", mouseEvent, true);
 canvas_spline.addEventListener("mousemove", mouseEvent, true);
@@ -45,7 +32,7 @@ function mouseEvent(e) {
     e.preventDefault();
     alt = e.altKey === true;
     if (e.type === 'wheel') {
-
+        scaleCanvas(e.wheelDelta > 0 ? 1.1 : 0.9, e.offsetX, e.offsetY);
     }
     else if (e.type === 'mousedown') {
         move = true;
@@ -53,21 +40,18 @@ function mouseEvent(e) {
     else if (e.type === 'mousemove') {
         if (move && alt) {
             $canvas_spline.translateCanvas({
-                translateX: e.movementX,
-                translateY: e.movementY
+                translateX: e.movementX / current_scale,
+                translateY: e.movementY / current_scale
             }).drawLayers();
-            offsetX -= e.movementX;
-            console.log(offsetX);
-            offsetY -= e.movementY;
+            offsetX -= e.movementX / current_scale;
+            offsetY -= e.movementY / current_scale;
         }
     }
     else if (e.type === 'mouseup') {
-        console.log(e);
         move = false;
         if (!alt) {
-            console.log(offsetX);
-            let dot = new Dot(new Point(e.layerX + offsetX, e.layerY + offsetY), 8, colors[parseInt(Math.random() * 6)],
-                'ControlPoint_' + (dots.length));
+            let dot = new Dot(new Point((e.offsetX - zeroX) / current_scale + offsetX, (e.offsetY - zeroY) / current_scale + offsetY),
+                8, colors[parseInt(Math.random() * 6)], 'ControlPoint_' + (dots.length));
             dots.push(dot);
             dot.draw();
             if (dots.length === 1) {
@@ -81,7 +65,6 @@ function mouseEvent(e) {
     }
 }
 function keyboardEvent(e) {
-    // console.log(e);
     if (e.type === 'keydown') {
         if (e.keyCode === 18) {
             // Alt down
@@ -100,9 +83,45 @@ function keyboardEvent(e) {
                 dots[dots.length - 1].remove();
                 dots.pop();
             }
+            if (spline) {
+                spline.removePoints(grain);
+            }
         }
     }
 }
+function scaleCanvas(scale, eX, eY) {
+    console.log(current_scale);
+    console.log(offsetX);
+    console.log(offsetY);
+    console.log(current_scale);
+    $canvas_spline.scaleCanvas({
+        // TODO
+        x: (eX - zeroX) / current_scale + offsetX,
+        y: (eY - zeroY) / current_scale + offsetY,
+        scale: scale
+    }).drawLayers();
+    current_scale *= scale;
+    // $canvas_spline.translateCanvas({
+    //     translateX: offsetX,
+    //     translateY: offsetY
+    // }).scaleCanvas({
+    //     scale: scale
+    // }).translateCanvas({
+    //     translateX: 0,
+    //     translateY: 0
+    // }).drawLayers();
+    // offsetX = offsetY = 0;
+}
+$canvas_spline.translateCanvas({
+    translateX: canvas_spline.width / 2,
+    translateY: canvas_spline.height / 2
+});
+const zeroX = canvas_spline.width / 2;
+const zeroY = canvas_spline.height / 2;
+$canvas_spline.drawImage({
+    layer: true,
+    source: 'static/image.jpg'
+});
 
 $("#draw").click(function (e) {
     e.preventDefault();
@@ -120,23 +139,19 @@ function drawSpline() {
         console.log('Wrong input');
     }
 }
-
-$('canvas').drawImage({
-    layer: true,
-    source: 'static/image.jpg',
-    x: canvas_spline.width / 2,
-    y: canvas_spline.height / 2
-});
-
 $('#clear').click(function (e) {
     e.preventDefault();
     if (spline) {
         spline.remove();
+        spline = null;
     }
     while (dots.length > 0) {
         line.removePoint();
         dots[dots.length - 1].remove();
         dots.pop();
+    }
+    while (points.length > 0) {
+        points.pop();
     }
     console.log("clear.");
     status = "DRAW";

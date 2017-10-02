@@ -57,6 +57,15 @@ class Line {
         this.draw();
     }
 
+    removePoints(n) {
+        for (let i = 0;i < n;i++) {
+            delete this['x' + this.length];
+            delete this['y' + this.length];
+            this.length -= 1;
+        }
+        this.draw();
+    }
+
     draw() {
         this.remove();
         if (this.length > 1) {
