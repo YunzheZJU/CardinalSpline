@@ -22,12 +22,16 @@ class Dot{
     remove() {
         $canvas_spline.removeLayer(this.name).drawLayers();
     }
+
+    getLocation() {
+        return this.location;
+    }
 }
 
 class Line {
-    constructor(color, width, points) {
+    constructor(color, width, points, name) {
         this.layer = true;
-        this.name = 'Line';
+        this.name = name;
         this.strokeStyle = color;
         this.strokeWidth = width;
         this.groups = ['Lines'];

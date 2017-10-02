@@ -34,11 +34,12 @@ class CdnSpline {
         for (let i = 0;i < this.grain;i++) {
             alpha.push(i / this.grain);
         }
+        console.log(this.control_points.length);
         for (let i = 1;i < this.control_points.length - 2;i++) {
             for (let j = 0;j < this.grain;j++) {
-                let x = this.makeCdnSegment(this.m, [this.control_points[i - 1].x, this.control_points[i].x,
+                let x = CdnSpline.makeCdnSegment(this.m, [this.control_points[i - 1].x, this.control_points[i].x,
                     this.control_points[i + 1].x, this.control_points[i + 2].x], alpha[j]);
-                let y = this.makeCdnSegment(this.m, [this.control_points[i - 1].y, this.control_points[i].y,
+                let y = CdnSpline.makeCdnSegment(this.m, [this.control_points[i - 1].y, this.control_points[i].y,
                     this.control_points[i + 1].y, this.control_points[i + 2].y], alpha[j]);
                 this.points.push(new Point(x, y));
             }
@@ -55,7 +56,7 @@ class CdnSpline {
 
     calculate() {
         // Duplicate the last point
-        this.control_points.push(this.control_points[this.control_points.length]);
+        this.control_points.push(this.control_points[this.control_points.length - 1]);
         // Duplicate the first point
         this.control_points.unshift(this.control_points[0]);
         // Calculate the matrix Mc with tension

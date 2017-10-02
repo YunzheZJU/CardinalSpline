@@ -5,11 +5,15 @@
 'use strict';
 let $canvas_spline = $('#splinecanvas');
 let canvas_spline = $canvas_spline[0];
+let $tension = $("#tension");
+let $grain = $("#grain");
 let move = false;
 let alt = false;
 const colors = ['red', 'blue', 'yellow', 'orange', 'purple', 'green'];
 let dots = [];
+let points = [];
 let line;
+let spline;
 canvas_spline.width = window.innerWidth - 35;
 resizeFnBox.push(function () {
     canvas_spline.width = window.innerWidth - 35;
@@ -49,11 +53,12 @@ function mouseEvent(e) {
         dots.push(dot);
         dot.draw();
         if (dots.length === 1) {
-            line = new Line('rgba(100, 100, 150, 0.2)', 3, [dot.location]);
+            line = new Line('rgba(100, 100, 150, 0.2)', 3, [dot.getLocation()], 'line');
         }
         else {
             line.addPoint(dot.location);
         }
+        console.log(dots);
     }
 }
 function keyboardEvent(e) {
@@ -80,6 +85,22 @@ function keyboardEvent(e) {
     }
 }
 
-$("form").submit(function () {
-    console.log()
+$("form").submit(function (e) {
+    e.preventDefault();
+    if ($tension[0].value && $grain[0].value && dots.length > 0) {
+        let tension = parseFloat($tension[0].value);
+        let grain = parseFloat($grain[0].value);
+        let control_points;
+        control_points= dots.map(function (dot) {
+            return dot.getLocation();
+        });
+        console.log(control_points);
+        let cdnspline = new CdnSpline(control_points, grain, tension);
+        points = cdnspline.calculate();
+        console.log(points);
+        spline = new Line('rgba(255, 50, 50, 0.6)', 3, points, 'spline');
+    }
+    else {
+        console.log('Wrong input');
+    }
 });
