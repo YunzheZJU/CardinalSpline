@@ -29,7 +29,7 @@ class CdnSpline {
         this.m = m;
     }
 
-    makeCdnSpline() {
+    combineCdnSegments() {
         let alpha = [];
         for (let i = 0;i < this.grain;i++) {
             alpha.push(i / this.grain);
@@ -62,7 +62,7 @@ class CdnSpline {
         // Calculate the matrix Mc with tension
         this.makeCdnMatrix();
         // Calculate the segments and parametrize the whole spline.
-        this.makeCdnSpline();
+        this.combineCdnSegments();
         return this.points;
     }
 

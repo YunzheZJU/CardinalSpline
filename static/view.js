@@ -58,9 +58,13 @@ class Line {
     }
 
     draw() {
-        $canvas_spline.removeLayer(this.name).drawLayers();
+        this.remove();
         if (this.length > 1) {
             $canvas_spline.drawLine(this);
         }
+    }
+
+    remove() {
+        $canvas_spline.removeLayer(this.name).drawLayers();
     }
 }

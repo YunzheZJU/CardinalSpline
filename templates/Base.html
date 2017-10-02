@@ -10,6 +10,7 @@
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon_16.ico') }}" type="image/x-icon">
     <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
     <link type="text/css" href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
+    <link type="text/css" href="{{ url_for('static', filename='jquery-ui.css') }}" rel="stylesheet">
     <link type="text/css" href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
     {%- block head %}{% endblock %}
     <!--[if lt IE 9]>
@@ -60,6 +61,7 @@
     <script type="text/javascript" src="{{ url_for('static', filename='jquery-3.2.1.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='popper.min.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='jquery-ui.js') }}"></script>
     <script type="text/javascript" src="{{ url_for('static', filename='effect.js') }}"></script>
     {%- block scripts %}{%- endblock %}
 </body>

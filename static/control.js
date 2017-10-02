@@ -13,8 +13,12 @@ let dots = [];
 let points = [];
 let line;
 let spline;
+let grain = 20;
+let tension = 0.5;
 let scale = 1;
 let status = "DRAW";
+let offsetX = 0;
+let offsetY = 0;
 const MAX_SCALE = 2;
 const MIN_SCALE = 0.5;
 const colors = ['red', 'blue', 'yellow', 'orange', 'purple', 'green'];
@@ -33,14 +37,14 @@ function mouseEvent(e) {
     e.preventDefault();
     alt = e.altKey === true;
     if (e.type === 'wheel') {
-        if (status === "Draw") {
-            return;
+        if (status === "DRAW") {
+            // return;
         }
         if (e.wheelDelta > 0 && scale < MAX_SCALE) {
             console.log("Zoom in");
             $canvas_spline.scaleCanvas({
-                x: e.offsetX,
-                y: e.offsetY,
+                x: e.layerX,
+                y: e.layerY,
                 scale: 1.1
             });
             scale *= 1.1;
@@ -48,12 +52,14 @@ function mouseEvent(e) {
         else if (e.wheelDelta < 0 && scale > MIN_SCALE) {
             console.log("Zoom out");
             $canvas_spline.scaleCanvas({
-                x: e.offsetX,
-                y: e.offsetY,
+                x: e.layerX,
+                y: e.layerY,
                 scale: 0.9
             });
             scale *= 0.9
         }
+        // console.log("scale: " + scale);
+        console.log("offset: " + offsetX + ", " + offsetY);
         $canvas_spline.drawLayers();
     }
     else if (e.type === 'mousedown') {
@@ -64,14 +70,16 @@ function mouseEvent(e) {
             $canvas_spline.translateCanvas({
                 translateX: e.movementX,
                 translateY: e.movementY
-            });
-            $canvas_spline.drawLayers();
+            }).drawLayers();
+            offsetX -= e.movementX;
+            offsetY -= e.movementY;
         }
     }
     else if (e.type === 'mouseup') {
+        console.log(e);
         move = false;
         if (!alt) {
-            let dot = new Dot(new Point(e.layerX, e.layerY), 8, colors[parseInt(Math.random() * 6)],
+            let dot = new Dot(new Point(e.layerX + offsetX, e.layerY + offsetY), 8, colors[parseInt(Math.random() * 6)],
                 'ControlPoint_' + (dots.length));
             dots.push(dot);
             dot.draw();
@@ -79,7 +87,7 @@ function mouseEvent(e) {
                 line = new Line('rgba(100, 100, 150, 0.2)', 3, [dot.getLocation()], 'line');
             }
             else {
-                line.addPoint(dot.location);
+                line.addPoint(dot.getLocation());
             }
         }
     }
@@ -108,21 +116,85 @@ function keyboardEvent(e) {
     }
 }
 
-$("#submit").click(function (e) {
+$("#draw").click(function (e) {
     e.preventDefault();
+    drawSpline();
+});
+function drawSpline() {
     if ($tension[0].value && $grain[0].value && dots.length > 0) {
-        let tension = parseFloat($tension[0].value);
-        let grain = parseFloat($grain[0].value);
-        let control_points;
-        control_points= dots.map(function (dot) {
+        points = (new CdnSpline(dots.map(function (dot) {
             return dot.getLocation();
-        });
-        let cdnspline = new CdnSpline(control_points, grain, tension);
-        points = cdnspline.calculate();
+        }), grain, tension)).calculate();
         spline = new Line('rgba(255, 50, 50, 0.6)', 3, points, 'spline');
         status = "VIEW";
     }
     else {
         console.log('Wrong input');
+    }
+}
+$('canvas').drawImage({
+    layer: true,
+    source: 'static/image.jpg',
+    x: 0, y: 0,
+    width: canvas_spline.width,
+    height: canvas_spline.height,
+    fromCenter: false
+});
+$('#clear').click(function (e) {
+    e.preventDefault();
+    if (spline) {
+        spline.remove();
+    }
+    while (dots.length > 0) {
+        line.removePoint();
+        dots[dots.length - 1].remove();
+        dots.pop();
+    }
+    $canvas_spline.removeLayerGroup("Scale").removeLayerGroup("Translate").drawLayers();
+    // $canvas_spline.clearCanvas();
+    $canvas_spline.scaleCanvas({
+        // x: -offsetX,
+        // y: -offsetY,
+        scale: 1 / scale
+    });
+    console.log("clear.");
+    status = "DRAW";
+});
+function autoRedraw() {
+    if ($('#checkbox')[0].checked) {
+        drawSpline();
+    }
+}
+let grainhandle = $( "#grainhandle" );
+$( "#grainslider" ).slider({
+    range: "min",
+    min: 1,
+    max: 50,
+    value: 20,
+    create: function() {
+        grainhandle.text( $( this ).slider( "value" ) );
+    },
+    slide: function( event, ui ) {
+        grainhandle.text(ui.value);
+        grain = parseInt(ui.value);
+        $('#grain')[0].value = "" + grain;
+        autoRedraw();
+    }
+});
+let tensionhandle = $( "#tensionhandle" );
+$( "#tensionslider" ).slider({
+    range: "min",
+    min: 0,
+    max: 1,
+    value: 0.5,
+    step: 0.05,
+    create: function() {
+        tensionhandle.text( $( this ).slider( "value" ) );
+    },
+    slide: function( event, ui ) {
+        tensionhandle.text(ui.value);
+        tension = parseFloat(ui.value);
+        $('#tension')[0].value = "" + tension;
+        autoRedraw();
     }
 });
