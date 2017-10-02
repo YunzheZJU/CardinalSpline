@@ -34,7 +34,6 @@ class CdnSpline {
         for (let i = 0;i < this.grain;i++) {
             alpha.push(i / this.grain);
         }
-        console.log(this.control_points.length);
         for (let i = 1;i < this.control_points.length - 2;i++) {
             for (let j = 0;j < this.grain;j++) {
                 let x = CdnSpline.makeCdnSegment(this.m, [this.control_points[i - 1].x, this.control_points[i].x,
@@ -44,6 +43,7 @@ class CdnSpline {
                 this.points.push(new Point(x, y));
             }
         }
+        this.points.push(this.control_points[this.control_points.length - 1]);
     }
 
     static makeCdnSegment(m, n, u) {

@@ -47,22 +47,18 @@ class Line {
         this.length += 1;
         this['x' + this.length] = point.x;
         this['y' + this.length] = point.y;
-        this.redraw();
+        this.draw();
     }
 
     removePoint() {
         delete this['x' + this.length];
         delete this['y' + this.length];
         this.length -= 1;
-        this.redraw();
-    }
-
-    redraw() {
-        $canvas_spline.removeLayer(this.name).drawLayers();
         this.draw();
     }
 
     draw() {
+        $canvas_spline.removeLayer(this.name).drawLayers();
         if (this.length > 1) {
             $canvas_spline.drawLine(this);
         }
