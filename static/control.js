@@ -23,9 +23,17 @@ const MAX_SCALE = 2;
 const MIN_SCALE = 0.5;
 const colors = ['red', 'blue', 'yellow', 'orange', 'purple', 'green'];
 canvas_spline.width = window.innerWidth - 35;
+let centerX = canvas_spline.width / 2;
 resizeFnBox.push(function () {
     canvas_spline.width = window.innerWidth - 35;
-    $canvas_spline.drawLayers();
+    let alias = (canvas_spline.width / 2 - centerX) / 2;
+    offsetX -= alias;
+    console.log(offsetX);
+    centerX = canvas_spline.width / 2;
+    $canvas_spline.translateCanvas({
+        translateX: alias,
+        translateY: 0
+    }).drawLayers();
 });
 canvas_spline.addEventListener("wheel", mouseEvent, true);
 canvas_spline.addEventListener("mousedown", mouseEvent, true);
@@ -37,30 +45,7 @@ function mouseEvent(e) {
     e.preventDefault();
     alt = e.altKey === true;
     if (e.type === 'wheel') {
-        if (status === "DRAW") {
-            // return;
-        }
-        if (e.wheelDelta > 0 && scale < MAX_SCALE) {
-            console.log("Zoom in");
-            $canvas_spline.scaleCanvas({
-                x: e.layerX,
-                y: e.layerY,
-                scale: 1.1
-            });
-            scale *= 1.1;
-        }
-        else if (e.wheelDelta < 0 && scale > MIN_SCALE) {
-            console.log("Zoom out");
-            $canvas_spline.scaleCanvas({
-                x: e.layerX,
-                y: e.layerY,
-                scale: 0.9
-            });
-            scale *= 0.9
-        }
-        // console.log("scale: " + scale);
-        console.log("offset: " + offsetX + ", " + offsetY);
-        $canvas_spline.drawLayers();
+
     }
     else if (e.type === 'mousedown') {
         move = true;
@@ -72,6 +57,7 @@ function mouseEvent(e) {
                 translateY: e.movementY
             }).drawLayers();
             offsetX -= e.movementX;
+            console.log(offsetX);
             offsetY -= e.movementY;
         }
     }
@@ -79,6 +65,7 @@ function mouseEvent(e) {
         console.log(e);
         move = false;
         if (!alt) {
+            console.log(offsetX);
             let dot = new Dot(new Point(e.layerX + offsetX, e.layerY + offsetY), 8, colors[parseInt(Math.random() * 6)],
                 'ControlPoint_' + (dots.length));
             dots.push(dot);
@@ -89,6 +76,7 @@ function mouseEvent(e) {
             else {
                 line.addPoint(dot.getLocation());
             }
+            autoRedraw();
         }
     }
 }
@@ -132,14 +120,14 @@ function drawSpline() {
         console.log('Wrong input');
     }
 }
+
 $('canvas').drawImage({
     layer: true,
     source: 'static/image.jpg',
-    x: 0, y: 0,
-    width: canvas_spline.width,
-    height: canvas_spline.height,
-    fromCenter: false
+    x: canvas_spline.width / 2,
+    y: canvas_spline.height / 2
 });
+
 $('#clear').click(function (e) {
     e.preventDefault();
     if (spline) {
@@ -150,13 +138,6 @@ $('#clear').click(function (e) {
         dots[dots.length - 1].remove();
         dots.pop();
     }
-    $canvas_spline.removeLayerGroup("Scale").removeLayerGroup("Translate").drawLayers();
-    // $canvas_spline.clearCanvas();
-    $canvas_spline.scaleCanvas({
-        // x: -offsetX,
-        // y: -offsetY,
-        scale: 1 / scale
-    });
     console.log("clear.");
     status = "DRAW";
 });
