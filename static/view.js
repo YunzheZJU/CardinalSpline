@@ -7,6 +7,7 @@ class Dot{
     constructor(location, r, color, name) {
         this.layer = true;
         this.name = name;
+        this.location = location;
         this.x = location.x;
         this.y = location.y;
         this.groups = ['ControlPoints'];
@@ -58,6 +59,8 @@ class Line {
     }
 
     draw() {
-        $canvas_spline.drawLine(this);
+        if (this.length > 1) {
+            $canvas_spline.drawLine(this);
+        }
     }
 }

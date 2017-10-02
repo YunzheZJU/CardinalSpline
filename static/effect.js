@@ -11,7 +11,7 @@ let segment_r_min = 5;
 let segment_r_max = 15;
 let segment_d_min = 5;
 let segment_d_max = 50;
-let segment_velocity_times = 0.5;
+let segment_velocity_times = 0.35;
 
 class Segment {
     constructor(x, y) {
@@ -72,13 +72,17 @@ class Segment {
         this._mx = dx / d * this.velocity;
         this._my = dy / d * this.velocity;
     }
+
+    scale(ratioX, ratioY) {
+        this.x *= ratioX;
+        this.y *= ratioY;
+    }
 }
 class Cursor {
     constructor(x, y) {
         this.x = x;
         this.y = y;
         this.r = Math.random() * 4;
-        this.factor = 0.99;
     }
 
     drawCursor(ctx) {
@@ -110,13 +114,15 @@ window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequest
     || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 window.cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
 
-let canvas = $('#canvas')[0];
-let ctx = canvas.getContext('2d');
-let w = canvas.width = canvas.offsetWidth;
-let h = canvas.height = canvas.offsetHeight;
+let canvas_effect = $('#effectcanvas')[0];
+let ctx = canvas_effect.getContext('2d');
+let w = canvas_effect.width = canvas_effect.offsetWidth;
+let h = canvas_effect.height = canvas_effect.offsetHeight;
 let segments = [];
 let cursor = new Cursor(0, 0);
-let requestId;
+let requestId = null;
+let resizeFnBox = [];
+let resizeTimer = null;
 
 let drawEffect = function () {
     ctx.clearRect(0, 0, w, h);
@@ -135,50 +141,69 @@ let drawEffect = function () {
             cursor.attract(segments[k]);
         }
     }
-    startEffect();
+    requestId = requestAnimationFrame(drawEffect);
 };
 
 let pauseEffect = function () {
-    cancelAnimationFrame(requestId);
-    isrunning = false;
+    if (isrunning) {
+        cancelAnimationFrame(requestId);
+        isrunning = false;
+        console.log("Effect is Paused.");
+    }
 };
 
-let startEffect = function () {
-    requestId = requestAnimationFrame(drawEffect);
+let continueEffect = function () {
     isrunning = true;
+    requestId = requestAnimationFrame(drawEffect);
+    console.log("Effect is continued.");
 };
 
-let initEffect = function (num) {
+let startEffect = function (num) {
     for (let i = 0; i < num; i++) {
         segments.push(new Segment(Math.random() * w, Math.random() * h));
     }
+    isrunning = true;
     drawEffect();
 };
 
-window.addEventListener('load', initEffect(200));
-window.onmousemove = function (e) {
-    if (e.toElement.id === "glcanvas") {
-        return;
-    }
+window.addEventListener('load', startEffect(100));
+canvas_effect.onmousemove = function (e) {
     e = e || window.event;
     cursor.x = e.clientX;
     cursor.y = e.clientY;
 };
-window.onmouseout = function () {
+canvas_effect.onmouseout = function () {
     cursor.x = null;
     cursor.y = null;
 };
 window.onresize = function () {
-    w = canvas.width = canvas.offsetWidth;
-    h = canvas.height = canvas.offsetHeight;
+    if (resizeTimer) {
+        clearTimeout(resizeTimer);
+    }
+    pauseEffect();
+    resizeTimer = setTimeout(function () {
+        for (let i = 0;i < resizeFnBox.length;i++) {
+            resizeFnBox[i]();
+        }
+        continueEffect();
+    }, 200);
 };
+resizeFnBox.push(function () {
+    let ratioX = canvas_effect.offsetWidth / w;
+    let ratioY = canvas_effect.offsetHeight / h;
+    w = canvas_effect.width = canvas_effect.offsetWidth;
+    h = canvas_effect.height = canvas_effect.offsetHeight;
+    for (let i = 0;i < segments.length;i++) {
+        segments[i].scale(ratioX, ratioY);
+    }
+});
 document.onkeypress = function (e) {
     if (e.keyCode === 113 || e.keyCode === 81) {
         if (isrunning) {
             pauseEffect();
         }
         else {
-            startEffect();
+            continueEffect();
         }
     }
 };

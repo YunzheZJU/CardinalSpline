@@ -7,15 +7,14 @@ let $canvas_spline = $('#splinecanvas');
 let canvas_spline = $canvas_spline[0];
 let move = false;
 let alt = false;
-let control_points = [];
-let colors = ['red', 'blue', 'yellow', 'orange', 'purple', 'green'];
+const colors = ['red', 'blue', 'yellow', 'orange', 'purple', 'green'];
 let dots = [];
 let line;
 canvas_spline.width = window.innerWidth - 35;
-window.onresize = function () {
+resizeFnBox.push(function () {
     canvas_spline.width = window.innerWidth - 35;
     $canvas_spline.drawLayers();
-};
+});
 canvas_spline.addEventListener("wheel", mouseEvent, true);
 canvas_spline.addEventListener("mousedown", mouseEvent, true);
 canvas_spline.addEventListener("mousemove", mouseEvent, true);
@@ -43,29 +42,17 @@ function mouseEvent(e) {
         }
         $canvas_spline.drawLayers();
     }
-    else if (e.type === 'mousedown') {
-        move = true;
-    }
-    else if (e.type === 'mousemove') {
-
-    }
     else if (e.type === 'mouseup') {
         move = false;
-        console.log(e.layerX, e.layerY);
-        control_points.push(new Point(e.layerX, e.layerY));
-        console.log(control_points);
-        let dot = new Dot(control_points[control_points.length - 1], 8, colors[parseInt(Math.random() * 6)],
-            'ControlPoint_' + (control_points.length - 1));
+        let dot = new Dot(new Point(e.layerX, e.layerY), 8, colors[parseInt(Math.random() * 6)],
+            'ControlPoint_' + (dots.length));
         dots.push(dot);
         dot.draw();
-        console.log(dot);
-        if (control_points.length >= 2) {
-            if (control_points.length === 2) {
-                line = new Line('rgba(100, 100, 150, 0.2)', 3, control_points);
-            }
-            else {
-                line.addPoint(control_points[control_points.length - 1]);
-            }
+        if (dots.length === 1) {
+            line = new Line('rgba(100, 100, 150, 0.2)', 3, [dot.location]);
+        }
+        else {
+            line.addPoint(dot.location);
         }
     }
 }
@@ -84,10 +71,15 @@ function keyboardEvent(e) {
         }
         else if (e.keyCode === 80) {
             // P up. Pop the last point
-            dots[control_points.length - 1].remove();
-            line.removePoint();
-            control_points.pop();
-            dots.pop();
+            if (dots.length > 0) {
+                line.removePoint();
+                dots[dots.length - 1].remove();
+                dots.pop();
+            }
         }
     }
 }
+
+$("form").submit(function () {
+    console.log()
+});

@@ -12,6 +12,17 @@
         <canvas id="splinecanvas" width="800" height="600" style="border: 1px solid #000000;">
             <h1>HTML5 Canvas is not supported in your browser!</h1>
         </canvas>
+        <form class="form-inline" role="form" id="form">
+            <div class="form-group">
+                <label class="sr-only" for="tension">Tension</label>
+                <input type="text" class="form-control" id="tension" placeholder="tension">
+            </div>
+            <div class="form-group">
+                <label class="sr-only" for="grain">Grain</label>
+                <input type="text" class="form-control" id="grain" placeholder="grain">
+            </div>
+            <button type="submit" class="btn btn-default" id="submit">提交</button>
+        </form>
 {% endblock %}
 
 {% block scripts %}
