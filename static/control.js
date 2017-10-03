@@ -6,21 +6,28 @@
 let $canvas_spline = $('#splinecanvas');
 let canvas_spline = $canvas_spline[0];
 let $grain = $("#grain");
-let grainhandle = $("#grainhandle");
+let $grainhandle = $("#grainhandle");
 let $grainslider = $("#grainslider");
 let $tension = $("#tension");
-let tensionhandle = $("#tensionhandle");
+let $tensionhandle = $("#tensionhandle");
 let $tensionslider = $("#tensionslider");
 let $dotsizeslider = $("#dotsizeslider");
 let $linewidthslider = $("#linewidthslider");
 let $showpoints = $('#showpoints');
+let $autodraw = $('#autodraw');
+let $draw = $('#draw');
+let $clear = $('#clear');
+let $run = $('#run');
+let $normalize = $('#normalize');
 let move = false;
 let alt = false;
 let dots = [];
 let points = [];
 let spline_points = [];
+let track_points = [];
 let line = null;
 let spline = null;
+let cdn_spline;
 let grain = 20;
 let tension = 0.5;
 let current_scale = 1;
@@ -44,7 +51,8 @@ $canvas_spline.translateCanvas({
 });
 $canvas_spline.drawImage({
     layer: true,
-    source: 'static/image.jpg'
+    source: 'static/images/image.jpg',
+    opacity: 0.5
 });
 resizeFnBox.push(function () {
     current_width = canvas_spline.width = window.innerWidth - 30;
@@ -156,7 +164,7 @@ function scaleCanvas(scale, eX, eY) {
 
 }
 
-$("#draw").click(function (e) {
+$draw.click(function (e) {
     e.preventDefault();
     drawSpline();
 });
@@ -172,9 +180,10 @@ function drawSpline() {
                 if (t_tension) {
                     if (t_tension >= TENSION_MIN && t_tension <= TENSION_MAX) {
                         tension = t_tension;
-                        points = (new CdnSpline(dots.map(function (dot) {
+                        cdn_spline = new CdnSpline(dots.map(function (dot) {
                             return dot.getLocation();
-                        }), grain, tension)).calculate();
+                        }), grain, tension);
+                        points = cdn_spline.calculate();
                         spline = new Line('rgba(255, 50, 50, 0.6)', line_width, points, 'spline');
                         if (spline_points) {
                             $canvas_spline.removeLayerGroup('SplinePoints').drawLayers();
@@ -193,7 +202,7 @@ function drawSpline() {
     }
     console.log('Wrong input');
 }
-$('#clear').click(function (e) {
+$clear.click(function (e) {
     e.preventDefault();
     if (spline) {
         spline.remove();
@@ -211,15 +220,71 @@ $('#clear').click(function (e) {
     }
     $canvas_spline.removeLayerGroup('ControlPoints');
     $canvas_spline.removeLayerGroup('SplinePoints');
+    $canvas_spline.removeLayer('myBox');
+    $canvas_spline.drawLayers();
+    frame = 0;
     console.log("clear.");
     status = "DRAW";
 });
 function autoDraw() {
-    if ($('#autodraw')[0].checked) {
+    if ($autodraw[0].checked) {
         drawSpline();
     }
 }
 
+let fps = 30;
+let now;
+let then = Date.now();
+let interval = 1000 / fps;
+let delta;
+let frame = 0;
+let animeId;
+function tick() {
+    animeId = requestAnimationFrame(tick);
+    now = Date.now();
+    delta = now - then;
+    if (delta > interval) {
+        then = now - (delta % interval);
+        drawBox();
+    }
+}
+function drawBox() {
+    console.log(frame);
+    if (frame < track_points.length - 1) {
+        frame++;
+        $canvas_spline.setLayer('myBox', {
+            x: track_points[frame].x, y: track_points[frame].y
+        }).drawLayers();
+    }
+    else {
+        cancelAnimationFrame(animeId);
+        $canvas_spline.removeLayer('myBox').drawLayers();
+        console.log('End.')
+    }
+}
+$run.click(function (e) {
+    e.preventDefault();
+    if (status === "VIEW") {
+        // TODO
+        track_points = cdn_spline.normalize(100);
+        console.log(track_points);
+        $canvas_spline.drawRect({
+            layer: true,
+            name: 'myBox',
+            fillStyle: '#36c',
+            x: track_points[0].x, y: track_points[0].y,
+            width: 20, height: 20
+        });
+        console.log('Start.');
+        tick();
+    }
+});
+$normalize.click(function (e) {
+    e.preventDefault();
+    if (cdn_spline) {
+        cdn_spline.makeLengthList();
+    }
+});
 $showpoints.change(function () {
     showPoints();
 });
@@ -243,15 +308,15 @@ $grain.bind('input', function () {
         if (t_grain >= GRAIN_MIN && t_grain <= GRAIN_MAX) {
             grain = t_grain;
             $grainslider.slider('value', [t_grain]);
-            grainhandle.text(t_grain);
+            $grainhandle.text(t_grain);
         }
         else if(t_grain < GRAIN_MIN) {
             $grainslider.slider('value', [GRAIN_MIN]);
-            grainhandle.text(GRAIN_MIN);
+            $grainhandle.text(GRAIN_MIN);
         }
         else if(t_grain > GRAIN_MAX) {
             $grainslider.slider('value', [GRAIN_MAX]);
-            grainhandle.text(GRAIN_MAX);
+            $grainhandle.text(GRAIN_MAX);
         }
     }
 });
@@ -261,12 +326,12 @@ $grainslider.slider({
     max: 50,
     value: 20,
     create: function() {
-        grainhandle.text( $( this ).slider( "value" ) );
+        $grainhandle.text( $( this ).slider( "value" ) );
     },
     slide: function( event, ui ) {
-        grainhandle.text(ui.value);
+        $grainhandle.text(ui.value);
         grain = parseInt(ui.value);
-        $('#grain')[0].value = "" + grain;
+        $grain[0].value = "" + grain;
         autoDraw();
     }
 });
@@ -276,15 +341,15 @@ $tension.bind('input', function () {
         if (t_tension >= TENSION_MIN && t_tension <= TENSION_MAX) {
             tension = t_tension;
             $tensionslider.slider('value', [t_tension]);
-            tensionhandle.text(t_grain);
+            $tensionhandle.text(t_grain);
         }
         else if(t_tension < TENSION_MIN) {
             $tensionslider.slider('value', [TENSION_MIN]);
-            tensionhandle.text(TENSION_MIN);
+            $tensionhandle.text(TENSION_MIN);
         }
         else if(t_tension > TENSION_MAX) {
             $tensionslider.slider('value', [TENSION_MAX]);
-            tensionhandle.text(TENSION_MAX);
+            $tensionhandle.text(TENSION_MAX);
         }
     }
 });
@@ -295,12 +360,12 @@ $tensionslider.slider({
     value: 0.5,
     step: 0.01,
     create: function() {
-        tensionhandle.text( $( this ).slider( "value" ) );
+        $tensionhandle.text( $( this ).slider( "value" ) );
     },
     slide: function( event, ui ) {
-        tensionhandle.text(ui.value);
+        $tensionhandle.text(ui.value);
         tension = parseFloat(ui.value);
-        $('#tension')[0].value = "" + tension;
+        $tension[0].value = "" + tension;
         autoDraw();
     }
 });

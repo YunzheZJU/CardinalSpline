@@ -15,25 +15,25 @@
         </canvas>
         <form class="form-horizontal" role="form">
             <div style="float: left;" class="col-sm-10">
-                <div class="form-group col-sm-6" style="float: right;">
-                    <label for="grain" class="col-sm-12 control-label">插值点数量</label>
+                <div class="form-group col-sm-3" style="float: left;">
+                    <label for="grain" class="col-sm-12 control-label">分段数</label>
                     <div class="col-sm-12">
-                        <input type="text" class="form-control col-sm-2" id="grain" placeholder="Grain" value="20">
+                        <input type="text" class="form-control col-sm-4" id="grain" placeholder="Grain" value="20">
                         <div id="grainslider" style="margin-top: 20px;">
                             <div id="grainhandle" class="ui-slider-handle"></div>
                         </div>
                     </div>
                 </div>
-                <div class="form-group col-sm-6" style="float: right;">
+                <div class="form-group col-sm-3" style="float: left;">
                     <label for="tension" class="col-sm-12 control-label">张力数值</label>
                     <div class="col-sm-12">
-                        <input type="text" class="form-control col-sm-2" id="tension" placeholder="Tension" value="0.5">
+                        <input type="text" class="form-control col-sm-4" id="tension" placeholder="Tension" value="0.5">
                         <div id="tensionslider" style="margin-top: 20px;">
                             <div id="tensionhandle" class="ui-slider-handle"></div>
                         </div>
                     </div>
                 </div>
-                <div class="form-group col-sm-2 " style="float: right;">
+                <div class="form-group col-sm-2 " style="float: left;">
                     <div class="checkbox col-sm-12">
                         <label>
                             <input type="checkbox" id="autodraw">自动重绘曲线
@@ -54,7 +54,17 @@
                 </div>
                 <div class="form-group">
                     <div class="col-sm-12">
+                        <button type="submit" class="btn btn-info" id="run">开始运动</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-12">
                         <button type="submit" class="btn btn-danger" id="clear">清除画布</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-sm-12">
+                        <button type="submit" class="btn btn-light" id="normalize">统一插值</button>
                     </div>
                 </div>
             </div>

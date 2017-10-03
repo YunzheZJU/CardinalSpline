@@ -3,6 +3,7 @@
  */
 
 'use strict';
+// TODO: classfy and add avoid()
 let cursor_show = false;
 let isrunning = false;
 let cursor_r_min = 30;
@@ -167,12 +168,12 @@ let startEffect = function (num) {
 };
 
 window.addEventListener('load', startEffect(100));
-window.onmousemove = function (e) {
+canvas_effect.onmousemove = function (e) {
     e = e || window.event;
     cursor.x = e.clientX;
     cursor.y = e.clientY;
 };
-window.onmouseout = function () {
+canvas_effect.onmouseout = function () {
     cursor.x = null;
     cursor.y = null;
 };
