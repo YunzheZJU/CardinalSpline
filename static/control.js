@@ -90,27 +90,40 @@ function keyboardEvent(e) {
     }
 }
 function scaleCanvas(scale, eX, eY) {
-    console.log(current_scale);
-    console.log(offsetX);
-    console.log(offsetY);
-    console.log(current_scale);
-    $canvas_spline.scaleCanvas({
-        // TODO
-        x: (eX - zeroX) / current_scale + offsetX,
-        y: (eY - zeroY) / current_scale + offsetY,
+    console.log("---------------");
+    console.log("current_scale: " + current_scale);
+    console.log("eX: " + eX);
+    console.log("eY: " + eY);
+    console.log("offsetX: " + offsetX);
+    console.log("offsetY: " + offsetY);
+    // $canvas_spline.scaleCanvas({
+    //     // TODO
+    //     x: (eX - zeroX) + offsetX,
+    //     y: (eY - zeroY) + offsetY,
+    //     scale: scale
+    // }).drawLayers();
+    let tempX = (eX - zeroX) / current_scale + offsetX;
+    console.log("tempX: " + tempX);
+    let tempY = (eY - zeroY) / current_scale + offsetY;
+    console.log("tempY: " + tempY);
+    $canvas_spline.translateCanvas({
+        translateX: tempX,
+        translateY: tempY
+    }).scaleCanvas({
         scale: scale
+    });
+    $canvas_spline.translateCanvas({
+        translateX: -tempX,
+        translateY: -tempY
     }).drawLayers();
     current_scale *= scale;
-    // $canvas_spline.translateCanvas({
-    //     translateX: offsetX,
-    //     translateY: offsetY
-    // }).scaleCanvas({
-    //     scale: scale
-    // }).translateCanvas({
-    //     translateX: 0,
-    //     translateY: 0
-    // }).drawLayers();
-    // offsetX = offsetY = 0;
+    console.log("current_scale: " + current_scale);
+    offsetX = tempX - (eX - zeroX) / current_scale;
+    console.log("offsetX: " + offsetX);
+    offsetY = tempY - (eY - zeroY) / current_scale;
+    console.log("offsetY: " + offsetY);
+    console.log("---------------");
+
 }
 $canvas_spline.translateCanvas({
     translateX: canvas_spline.width / 2,
