@@ -4,15 +4,16 @@
 
 'use strict';
 class Dot{
-    constructor(location, r, color, name) {
+    constructor(location, r, color, name, groupname) {
         this.layer = true;
         this.name = name;
         this.location = location;
         this.x = location.x;
         this.y = location.y;
-        this.groups = ['ControlPoints'];
+        this.groups = [groupname];
         this.radius = r;
         this.fillStyle = color;
+        this.draw();
     }
 
     draw() {
@@ -25,6 +26,12 @@ class Dot{
 
     getLocation() {
         return this.location;
+    }
+
+    setRadius(r) {
+        $canvas_spline.setLayer(this.name, {
+            radius: r
+        }).drawLayers();
     }
 }
 
@@ -75,5 +82,11 @@ class Line {
 
     remove() {
         $canvas_spline.removeLayer(this.name).drawLayers();
+    }
+
+    setWidth(width) {
+        $canvas_spline.setLayer(this.name, {
+            strokeWidth: width
+        }).drawLayers();
     }
 }
