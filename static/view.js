@@ -4,7 +4,7 @@
 
 'use strict';
 class Dot{
-    constructor(location, r, color, name, groupname, draggable) {
+    constructor(location, r, color, name, groupname, draggable, draw) {
         this.layer = true;
         this.name = name;
         this.x = location.x;
@@ -15,38 +15,40 @@ class Dot{
         this.radius = r;
         this.fillStyle = color;
         this.dragstart = function (layer) {
+            if (alt) {
+                msg("Please DO NOT press ALT when dragging!")
+            }
             isdragging = true;
             this.dragstartX = layer.x;
             this.dragstartY = layer.y;
             msg("Dragging starts.");
         };
         this.drag = function (layer) {
-            msg("----------");
-            // msg("Current speed is (" + layer.dx + ", " + layer.dy + ").");
-            // msg("You are dragging me to (" + layer.x + ", " + layer.y + ").");
             layer.x = this.dragstartX + (layer.x - this.dragstartX) / current_scale;
             layer.y = this.dragstartY + (layer.y - this.dragstartY) / current_scale;
-            // msg("Current scale is " + current_scale);
-            // msg("New speed should be (" + layer.dx / current_scale + ", " + layer.dy / current_scale + ").");
-            msg("New position should be (" + layer.x + ", " + layer.y + ").");
-            msg("----------");
         };
         this.dragstop = function (layer) {
             isdragging = false;
             msg("Dragging is stopped.");
-            dots[layer.index - 1].setLocation(layer.x, layer.y);
-            autoDraw();
-            msg(layer);
+            spline.movePoint(layer.index - 1, layer.x, layer.y);
         };
-        this.draw();
+        if (draw === true) {
+            this.draw();
+        }
     }
 
     draw() {
         $canvas_spline.drawArc(this);
+        return this;
     }
 
     remove() {
         $canvas_spline.removeLayer(this.name).drawLayers();
+        return this;
+    }
+
+    update() {
+        return this.remove().draw();
     }
 
     getLocation() {
@@ -78,21 +80,21 @@ class Line {
             this['x' + (i + 1)] = points[i].x;
             this['y' + (i + 1)] = points[i].y;
         }
-        this.draw()
+        this.update()
     }
 
     addPoint(point) {
         this.length += 1;
         this['x' + this.length] = point.x;
         this['y' + this.length] = point.y;
-        this.draw();
+        this.update();
     }
 
     popPoint() {
         delete this['x' + this.length];
         delete this['y' + this.length];
         this.length -= 1;
-        this.draw();
+        this.update();
     }
 
     popPoints(n) {
@@ -101,18 +103,21 @@ class Line {
             delete this['y' + this.length];
             this.length -= 1;
         }
-        this.draw();
+        this.update();
     }
 
     draw() {
-        this.remove();
-        if (this.length > 1) {
-            $canvas_spline.drawLine(this);
-        }
+        $canvas_spline.drawLine(this);
+        return this;
     }
 
     remove() {
         $canvas_spline.removeLayer(this.name).drawLayers();
+        return this;
+    }
+
+    update() {
+        return this.remove().draw();
     }
 
     setWidth(width) {

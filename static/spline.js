@@ -128,11 +128,24 @@ function keyboardEvent(e) {
             // P up. Remove the last point and everything related
             msg("P is up. Popping the last point and everything related.");
             spline.popPoint();
-            msg("The last point and everything related has been popped.");
         }
     }
 }
+$draw.click(function (e) {
+    e.preventDefault();
+    spline.drawSpline();
+});
 $normalize.click(function (e) {
     e.preventDefault();
     spline.normalizeSpline();
+});
+$clear.click(function (e) {
+    e.preventDefault();
+    spline.removeAll();
+});
+$showpoints.change(function () {
+    spline.setShowDots($showpoints[0].checked);
+});
+$autodraw.change(function () {
+    spline.setAutoDraw($autodraw[0].checked);
 });

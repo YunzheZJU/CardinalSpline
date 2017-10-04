@@ -54,36 +54,6 @@ function updateSpline() {
     showPoints();
     status = "VIEW";
 }
-$clear.click(function (e) {
-    e.preventDefault();
-    if (spline) {
-        spline.remove();
-        spline = null;
-    }
-    if (line) {
-        line.remove();
-        line = null;
-    }
-    while (dots.length > 0) {
-        dots.pop();
-    }
-    while (points.length > 0) {
-        points.pop();
-    }
-    $canvas_spline.removeLayerGroup('ControlPoints');
-    $canvas_spline.removeLayerGroup('SplinePoints');
-    $canvas_spline.removeLayer('myBox');
-    $canvas_spline.drawLayers();
-    frame = 0;
-    msg("Clear.");
-    status = "DRAW";
-});
-function autoDraw() {
-    // TODO: redraw line
-    if ($autodraw[0].checked) {
-        drawSpline();
-    }
-}
 
 let fps = 30;
 let now;
@@ -132,29 +102,6 @@ $run.click(function (e) {
         tick();
     }
 });
-$normalize.click(function (e) {
-    e.preventDefault();
-    if (cdn_spline) {
-        cdn_spline.makeLengthList();
-    }
-});
-$showpoints.change(function () {
-    showPoints();
-});
-function showPoints() {
-    if ($showpoints[0].checked) {
-        if (spline_points) {
-            $canvas_spline.removeLayerGroup('SplinePoints');
-            for (let i in spline_points) {
-                spline_points[i].draw();
-            }
-        }
-    }
-    else {
-        $canvas_spline.removeLayerGroup('SplinePoints');
-    }
-    $canvas_spline.drawLayers();
-}
 $grain.bind('input', function () {
     let t_grain = parseInt($grain[0].value);
     if (t_grain) {
