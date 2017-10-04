@@ -88,14 +88,14 @@ class Line {
         this.draw();
     }
 
-    removePoint() {
+    popPoint() {
         delete this['x' + this.length];
         delete this['y' + this.length];
         this.length -= 1;
         this.draw();
     }
 
-    removePoints(n) {
+    popPoints(n) {
         for (let i = 0;i < n;i++) {
             delete this['x' + this.length];
             delete this['y' + this.length];

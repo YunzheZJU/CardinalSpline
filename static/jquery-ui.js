@@ -1133,7 +1133,7 @@ $.fn.position = function( options ) {
 		pos[ 0 ] = rhorizontal.test( pos[ 0 ] ) ? pos[ 0 ] : "center";
 		pos[ 1 ] = rvertical.test( pos[ 1 ] ) ? pos[ 1 ] : "center";
 
-		// calculate offsets
+		// calculateSpline offsets
 		horizontalOffset = roffset.exec( pos[ 0 ] );
 		verticalOffset = roffset.exec( pos[ 1 ] );
 		offsets[ this ] = [
@@ -1148,7 +1148,7 @@ $.fn.position = function( options ) {
 		];
 	});
 
-	// normalize collision option
+	// normalizeSpline collision option
 	if ( collision.length === 1 ) {
 		collision[ 1 ] = collision[ 0 ];
 	}
@@ -3067,7 +3067,7 @@ function Datepicker() {
 		showOtherMonths: false, // True to show dates in other months, false to leave blank
 		selectOtherMonths: false, // True to allow selection of dates in other months, false for unselectable
 		showWeek: false, // True to show week of the year, false to not show it
-		calculateWeek: this.iso8601Week, // How to calculate the week of the year,
+		calculateWeek: this.iso8601Week, // How to calculateSpline the week of the year,
 			// takes a Date and returns the number of the week for it
 		shortYearCutoff: "+10", // Short year values < this are in the current century,
 			// > this are in the previous century,
@@ -4695,7 +4695,7 @@ $.extend(Datepicker.prototype, {
 					inst.selectedDay = Math.min(inst.selectedDay, daysInMonth);
 				}
 				leadDays = (this._getFirstDayOfMonth(drawYear, drawMonth) - firstDay + 7) % 7;
-				curRows = Math.ceil((leadDays + daysInMonth) / 7); // calculate the number of rows to generate
+				curRows = Math.ceil((leadDays + daysInMonth) / 7); // calculateSpline the number of rows to generate
 				numRows = (isMultiMonth ? this.maxRows > curRows ? this.maxRows : curRows : curRows); //If multiple months, use the higher number of rows (see #7043)
 				this.maxRows = numRows;
 				printDate = this._daylightSavingAdjust(new Date(drawYear, drawMonth, 1 - leadDays));
@@ -7926,7 +7926,7 @@ $.effects.animateClass = function( value, duration, easing, callback ) {
 		};
 		applyClassChange();
 
-		// map all animated objects again - calculate new styles and diff
+		// map all animated objects again - calculateSpline new styles and diff
 		allAnimations = allAnimations.map(function() {
 			this.end = getElementStyles( this.el[ 0 ] );
 			this.diff = styleDifference( this.start, this.end );
@@ -9221,7 +9221,7 @@ $.effects.effect.size = function( o, done ) {
 			$.effects.restore( el, props );
 			if ( !restore ) {
 
-				// we need to calculate our new positioning based on the scaling
+				// we need to calculateSpline our new positioning based on the scaling
 				if ( position === "static" ) {
 					el.css({
 						position: "relative",
@@ -13795,7 +13795,7 @@ function getNextTabId() {
 
 function isLocal( anchor ) {
 	// support: IE7
-	// IE7 doesn't normalize the href property when set via script (#9317)
+	// IE7 doesn't normalizeSpline the href property when set via script (#9317)
 	anchor = anchor.cloneNode( false );
 
 	return anchor.hash.length > 1 &&

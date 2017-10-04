@@ -3,6 +3,19 @@
  */
 
 'use strict';
+const colors = ['red', 'blue', 'yellow', 'orange', 'purple', 'green'];
+const GRAIN_DEFAULT = 20;
+const GRAIN_MIN = 1;
+const GRAIN_MAX = 50;
+const TENSION_DEFAULT = 0.5;
+const TENSION_MIN = 0;
+const TENSION_MAX = 1;
+const DOT_SIZE_DEFAULT = 3;
+const LINE_WIDTH_DEFAULT = 3;
+const NORMALIZATION_FACTOR = 5;
+const SHOW_DOTS = true;
+const AUTO_DRAWING = true;
+
 class Point {
     constructor(x, y) {
         this.x = x;
@@ -10,19 +23,79 @@ class Point {
     }
 }
 
+class SplineDots {
+    constructor(points) {
+        this.dots = points.map(function (point) {
+            return new Dot(point, 3, "rgba(50, 200, 50, 0.8)",
+                "SplinePoint_" + points.indexOf(point), 'SplinePoints', false);
+        }, this);
+    }
+
+    static removeAll() {
+        msg("Removing SplinePoints...");
+        $canvas_spline.removeLayerGroup("SplinePoints").drawLayers();
+    }
+
+    drawSplineDots() {
+        msg("Drawing SplinePoints...");
+        for (let dot of this.dots) {
+            dot.draw();
+        }
+    }
+}
+
+class SplinePoints {
+    constructor(points) {
+        // Array consists of class Point
+        this.points = points;
+        // Array consist of class SplineDots
+        this.spline_dots = null;
+        this.spline_dots = new SplineDots(points);
+        if (SHOW_DOTS) {
+            msg("Drawing Dots...");
+            SplineDots.removeAll();
+            this.spline_dots.drawSplineDots();
+        }
+        msg("Drawing spline...");
+        // class Line
+        this.spline_points_line = new Line('rgba(255, 50, 50, 0.6)', LINE_WIDTH_DEFAULT, this.points,
+            'SplinePointsLine');
+    }
+
+    getPoints() {
+        return this.points;
+    }
+
+    removePoints() {
+        this.points = [];
+        this.spline_points_line.remove();
+        SplineDots.removeAll();
+    }
+}
+
+class Rocket {
+
+}
+
 class CdnSpline {
     constructor(control_points, grain, tension) {
-        // The array where results lies
-        this.points = [];
-        this.uniform_points = [];
+        // class SplinePoints
+        this.spline_points = null;
+        // Array consists of class Point
+        this.normalized_spline_points = null;
+        // class Rocket
+        this.rocket = new Rocket();
+
         this.length_list = [];
         this.length = 0;
-        this.control_points = control_points;
+        this.points = control_points;
         this.grain = grain;
         this.tension = tension;
+        this.calculateSpline();
     }
 
     makeMatrix() {
+        msg("Making Matrix...");
         let t = this.tension;
         let m = new Array(16);
         m[0] = -t;      m[1] = 2 - t;   m[2] = t - 2;       m[3] = t;
@@ -33,22 +106,33 @@ class CdnSpline {
     }
 
     combineSegments() {
-        // TODO: Rename
+        msg("Combining segments...");
+        // TODO: Rename alpha
         let alpha = [];
+        let result = [];
         for (let i = 0;i < this.grain;i++) {
             alpha.push(i / this.grain);
         }
-        for (let i = 1;i < this.control_points.length - 2;i++) {
+        for (let i = 1; i < this.points.length - 2; i++) {
             for (let j = 0;j < this.grain;j++) {
-                let x = CdnSpline.makeSegment(this.m, [this.control_points[i - 1].x, this.control_points[i].x,
-                    this.control_points[i + 1].x, this.control_points[i + 2].x], alpha[j]);
-                let y = CdnSpline.makeSegment(this.m, [this.control_points[i - 1].y, this.control_points[i].y,
-                    this.control_points[i + 1].y, this.control_points[i + 2].y], alpha[j]);
-                this.points.push(new Point(x, y));
+                let x = CdnSpline.makeSegment(this.m, [this.points[i - 1].x, this.points[i].x,
+                    this.points[i + 1].x, this.points[i + 2].x], alpha[j]);
+                let y = CdnSpline.makeSegment(this.m, [this.points[i - 1].y, this.points[i].y,
+                    this.points[i + 1].y, this.points[i + 2].y], alpha[j]);
+                result.push(new Point(x, y));
             }
         }
-        // Push the last control point into points[].
-        this.points.push(this.control_points[this.control_points.length - 1]);
+        // Push the last control point into spline_points[].
+        result.push(this.points[this.points.length - 1]);
+        if (this.normalized_spline_points !== null) {
+            msg("Unreachable.");
+            msg("Cleaning...");
+            this.normalized_spline_points.removePoints();
+            this.normalized_spline_points = null;
+        }
+        msg("Generating result...");
+        this.points = result;
+        this.spline_points = new SplinePoints(result);
     }
 
     static makeSegment(m, n, u) {
@@ -59,17 +143,15 @@ class CdnSpline {
         return c[3] + u * (c[2] + u * (c[1] + u * c[0]));
     }
 
-    // TODO: Rename
-    calculate() {
+    calculateSpline() {
         // Duplicate the last point
-        this.control_points.push(this.control_points[this.control_points.length - 1]);
+        this.points.push(this.points[this.points.length - 1]);
         // Duplicate the first point
-        this.control_points.unshift(this.control_points[0]);
+        this.points.unshift(this.points[0]);
         // Calculate the matrix Mc with tension
         this.makeMatrix();
-        // Calculate the segments and parametrize the whole spline.
+        // Combine the segments
         this.combineSegments();
-        return this.points;
     }
 
     static multiply(M, n, order) {
@@ -80,13 +162,24 @@ class CdnSpline {
         return sum;
     }
 
-    normalize(n) {
-        let step = 1 / n;
-        for (let i = 1;i < n;i++) {
-            this.uniform_points.push(this.findPointByLength(i * step * this.length));
+    normalizeSpline() {
+        if (this.spline_points === null) {
+            msg("Please make a spline first!");
         }
-        this.uniform_points.push(this.points[this.points.length - 1]);
-        return this.uniform_points;
+        else {
+            msg("Calculating...");
+            this.makeLengthList();
+            let step = 1 / NORMALIZATION_FACTOR;
+            let result = [];
+            for (let i = 1;i < NORMALIZATION_FACTOR;i++) {
+                result.push(this.findPointByLength(i * step * this.length));
+            }
+            result.push(this.points[this.points.length - 1]);
+            this.spline_points.removePoints();
+            this.spline_points = null;
+            msg("Generating results...");
+            this.normalized_spline_points = new SplinePoints(result);
+        }
     }
 
     calculateF(u) {
@@ -134,14 +227,12 @@ class CdnSpline {
         this.points.push(this.points[this.points.length - 1]);
         // Duplicate the first point
         this.points.unshift(this.points[0]);
-        for (let i = 0;i < points.length - 3;i++) {
-            this.calculateCoefficient(this.m, [points[i], points[i + 1], points[i + 2], points[i + 3]]);
+        for (let i = 0;i < this.points.length - 3;i++) {
+            this.calculateCoefficient(this.m, [this.points[i], this.points[i + 1], this.points[i + 2], this.points[i + 3]]);
             length += this.calculateSimpsonLength(0, 1);
             this.length_list.push(length);
         }
         this.length = length;
-        // console.log(this.length_list);
-        // console.log(length);
     }
 
     findPointByLength(length) {
@@ -151,14 +242,14 @@ class CdnSpline {
         let u_current;
         let current_length;
         let difference_length;
-        const STEP = 0.05;
+        const STEP = 0.01;
         while (this.length_list[segment_no] < length) {
             segment_no++;
         }
         segment_no -= 1;
         let target_length = length - this.length_list[segment_no];
         let param_list = this.calculateCoefficient(this.m,
-            [points[segment_no], points[segment_no + 1], points[segment_no + 2], points[segment_no + 3]]);
+            [this.points[segment_no], this.points[segment_no + 1], this.points[segment_no + 2], this.points[segment_no + 3]]);
         do {
             u_current = (u_max + u_min) / 2;
             current_length = this.calculateSimpsonLength(u_min, u_current);
@@ -177,5 +268,122 @@ class CdnSpline {
 
     static calculatePoint(u, param) {
         return param[0] * u * u * u + param[1] * u * u + param[2] * u + param[3];
+    }
+}
+
+class ControlDots {
+    constructor() {
+        this.dot_size = 8;
+        this.control_dots = [];
+    }
+
+    addDot(x, y) {
+        this.control_dots.push(new Dot(new Point(x, y), this.dot_size, colors[parseInt(Math.random() * 6)],
+            'ControlPoint_' + (this.control_dots.length), 'ControlPoints'));
+    }
+
+    popDot() {
+        this.control_dots[this.control_dots.length - 1].remove();
+        this.control_dots.pop();
+    }
+}
+
+class ControlPointsLine {
+    constructor(color, width, points, name) {
+        this.line = new Line(color, width, points, name);
+    }
+
+    addPoint(point) {
+        this.line.addPoint(point);
+    }
+
+    popPoint() {
+        this.line.popPoint();
+    }
+}
+
+class ControlPoints {
+    constructor() {
+        // Array of class Point
+        this.points = [];
+        // class CdnSpline
+        this.cdn_spline = null;
+        // class Line
+        this.control_points_line = null;
+        // Array consists of class Dot
+        this.control_dots = new ControlDots();
+    }
+
+    addControlPoint(x, y, grain, tension) {
+        let point = new Point(x, y);
+        this.points.push(point);
+        this.control_dots.addDot(x, y);
+        if (this.points.length > 1){
+            // Add a new point and create a new Cardinal spline.
+            this.control_points_line.addPoint(point);
+            if (AUTO_DRAWING) {
+                msg('Calculating...');
+                msg(this.points);
+                this.cdn_spline = new CdnSpline(this.points, grain, tension);
+                msg(this.points);
+                this.points.shift();
+                this.points.pop();
+                msg(this.points);
+            }
+        }
+        else {
+            // Initialize control_points_line
+            this.control_points_line = new ControlPointsLine('rgba(100, 100, 150, 0.2)', LINE_WIDTH_DEFAULT, [point],
+                'ControlPointsLine')
+        }
+    }
+
+    popPoint(grain, tension) {
+        if (this.points.length > 0) {
+            this.points.pop();
+            this.control_dots.popDot();
+            this.control_points_line.popPoint();
+            if (this.points.length > 0) {
+                this.cdn_spline = new CdnSpline(this.points, grain, tension);
+            }
+            else {
+                SplineDots.removeAll();
+            }
+        }
+    }
+
+    normalizeSpline() {
+        this.cdn_spline.normalizeSpline();
+    }
+}
+
+class Spline {
+    constructor() {
+        // class ControlPoints
+        this.control_points = new ControlPoints();
+        this.grain = GRAIN_DEFAULT;
+        this.tension = TENSION_DEFAULT;
+    }
+
+    addControlPoint(x, y) {
+        this.control_points.addControlPoint(x, y, this.grain, this.tension);
+    }
+
+    popPoint() {
+        this.control_points.popPoint(this.grain, this.tension);
+    }
+
+    normalizeSpline() {
+        this.control_points.normalizeSpline();
+    }
+
+    setGrain(value) {
+        this.grain = value;
+        msg("Grain of the Cardinal spline has been set to be "+ value);
+    }
+
+    setTension(value) {
+        this.tension = value;
+        msg("Tension of the Cardinal spline has been set to be "+ value);
     }
 }
