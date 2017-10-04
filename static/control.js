@@ -3,6 +3,11 @@
  */
 
 'use strict';
+class Dots extends Array{
+    echo() {
+        msg("Hi");
+    }
+}
 let $canvas_spline = $('#splinecanvas');
 let canvas_spline = $canvas_spline[0];
 let $grain = $("#grain");
@@ -19,15 +24,17 @@ let $draw = $('#draw');
 let $clear = $('#clear');
 let $run = $('#run');
 let $normalize = $('#normalize');
+let $message = $('#spline-message');
 let move = false;
 let alt = false;
-let dots = [];
+let dots = new Dots();
 let points = [];
 let spline_points = [];
 let track_points = [];
 let line = null;
 let spline = null;
-let cdn_spline;
+let cdn_spline = null;
+let isdragging = false;
 let grain = 20;
 let tension = 0.5;
 let current_scale = 1;
@@ -83,7 +90,8 @@ function mouseEvent(e) {
         move = true;
     }
     else if (e.type === 'mousemove') {
-        if (move && alt) {
+        // msg(isdragging);
+        if (move && alt && !isdragging) {
             $canvas_spline.translateCanvas({
                 translateX: e.movementX / current_scale,
                 translateY: e.movementY / current_scale
@@ -94,9 +102,9 @@ function mouseEvent(e) {
     }
     else if (e.type === 'mouseup') {
         move = false;
-        if (!alt) {
+        if (!alt && !isdragging) {
             let dot = new Dot(new Point((e.offsetX - zeroX) / current_scale + offsetX, (e.offsetY - zeroY) / current_scale + offsetY),
-                dot_size, colors[parseInt(Math.random() * 6)], 'ControlPoint_' + (dots.length), 'ControlPoints');
+                dot_size, colors[parseInt(Math.random() * 6)], 'ControlPoint_' + (dots.length), 'ControlPoints', true);
             dots.push(dot);
             if (dots.length === 1) {
                 line = new Line('rgba(100, 100, 150, 0.2)', 3, [dot.getLocation()], 'line');
@@ -180,27 +188,31 @@ function drawSpline() {
                 if (t_tension) {
                     if (t_tension >= TENSION_MIN && t_tension <= TENSION_MAX) {
                         tension = t_tension;
-                        cdn_spline = new CdnSpline(dots.map(function (dot) {
-                            return dot.getLocation();
-                        }), grain, tension);
-                        points = cdn_spline.calculate();
-                        spline = new Line('rgba(255, 50, 50, 0.6)', line_width, points, 'spline');
-                        if (spline_points) {
-                            $canvas_spline.removeLayerGroup('SplinePoints').drawLayers();
-                        }
-                        spline_points = points.map(function (point) {
-                            return new Dot(point, 3, "rgba(50, 200, 50, 0.8)", "SplinePoint_" + points.indexOf(point),
-                                'SplinePoints');
-                        });
-                        showPoints();
-                        status = "VIEW";
+                        updateSpline();
                         return;
                     }
                 }
             }
         }
     }
-    console.log('Wrong input');
+    msg("Wrong input.");
+}
+function updateSpline() {
+    msg(dots);
+    cdn_spline = new CdnSpline(dots.map(function (dot) {
+        return dot.getLocation();
+    }), grain, tension);
+    points = cdn_spline.calculate();
+    spline = new Line('rgba(255, 50, 50, 0.6)', line_width, points, 'spline');
+    if (spline_points) {
+        $canvas_spline.removeLayerGroup('SplinePoints').drawLayers();
+    }
+    spline_points = points.map(function (point) {
+        return new Dot(point, 3, "rgba(50, 200, 50, 0.8)", "SplinePoint_" + points.indexOf(point),
+            'SplinePoints', false);
+    });
+    showPoints();
+    status = "VIEW";
 }
 $clear.click(function (e) {
     e.preventDefault();
@@ -223,10 +235,11 @@ $clear.click(function (e) {
     $canvas_spline.removeLayer('myBox');
     $canvas_spline.drawLayers();
     frame = 0;
-    console.log("clear.");
+    msg("Clear.");
     status = "DRAW";
 });
 function autoDraw() {
+    // TODO: redraw line
     if ($autodraw[0].checked) {
         drawSpline();
     }
@@ -259,7 +272,7 @@ function drawBox() {
     else {
         cancelAnimationFrame(animeId);
         $canvas_spline.removeLayer('myBox').drawLayers();
-        console.log('End.')
+        msg("End.");
     }
 }
 $run.click(function (e) {
@@ -275,7 +288,7 @@ $run.click(function (e) {
             x: track_points[0].x, y: track_points[0].y,
             width: 20, height: 20
         });
-        console.log('Start.');
+        msg("Start.");
         tick();
     }
 });
@@ -341,7 +354,7 @@ $tension.bind('input', function () {
         if (t_tension >= TENSION_MIN && t_tension <= TENSION_MAX) {
             tension = t_tension;
             $tensionslider.slider('value', [t_tension]);
-            $tensionhandle.text(t_grain);
+            $tensionhandle.text(t_tension);
         }
         else if(t_tension < TENSION_MIN) {
             $tensionslider.slider('value', [TENSION_MIN]);
@@ -399,3 +412,8 @@ $linewidthslider.slider({
         }
     }
 });
+function msg(msg) {
+    console.log(msg);
+    $message.text(msg);
+}
+dots.echo();

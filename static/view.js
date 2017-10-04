@@ -4,15 +4,40 @@
 
 'use strict';
 class Dot{
-    constructor(location, r, color, name, groupname) {
+    constructor(location, r, color, name, groupname, draggable) {
         this.layer = true;
         this.name = name;
-        this.location = location;
         this.x = location.x;
         this.y = location.y;
+        this.draggable = draggable;
+        this.intangible = !draggable;
         this.groups = [groupname];
         this.radius = r;
         this.fillStyle = color;
+        this.dragstart = function (layer) {
+            isdragging = true;
+            this.dragstartX = layer.x;
+            this.dragstartY = layer.y;
+            msg("Dragging starts.");
+        };
+        this.drag = function (layer) {
+            msg("----------");
+            // msg("Current speed is (" + layer.dx + ", " + layer.dy + ").");
+            // msg("You are dragging me to (" + layer.x + ", " + layer.y + ").");
+            layer.x = this.dragstartX + (layer.x - this.dragstartX) / current_scale;
+            layer.y = this.dragstartY + (layer.y - this.dragstartY) / current_scale;
+            // msg("Current scale is " + current_scale);
+            // msg("New speed should be (" + layer.dx / current_scale + ", " + layer.dy / current_scale + ").");
+            msg("New position should be (" + layer.x + ", " + layer.y + ").");
+            msg("----------");
+        };
+        this.dragstop = function (layer) {
+            isdragging = false;
+            msg("Dragging is stopped.");
+            dots[layer.index - 1].setLocation(layer.x, layer.y);
+            autoDraw();
+            msg(layer);
+        };
         this.draw();
     }
 
@@ -25,7 +50,12 @@ class Dot{
     }
 
     getLocation() {
-        return this.location;
+        return {x: this.x, y: this.y};
+    }
+
+    setLocation(x, y) {
+        this.x = x;
+        this.y = y;
     }
 
     setRadius(r) {
@@ -43,6 +73,7 @@ class Line {
         this.strokeWidth = width;
         this.groups = ['Lines'];
         this.length = points.length;
+        this.intangible = true;
         for (let i = 0;i < points.length;i++) {
             this['x' + (i + 1)] = points[i].x;
             this['y' + (i + 1)] = points[i].y;
