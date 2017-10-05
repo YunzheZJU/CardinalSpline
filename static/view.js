@@ -30,7 +30,7 @@ class Dot{
         this.dragstop = function (layer) {
             isdragging = false;
             msg("Dragging is stopped.");
-            spline.movePoint(layer.index - 1, layer.x, layer.y);
+            spline.moveControlPoint(layer.index - 1, layer.x, layer.y);
         };
         if (draw === true) {
             this.draw();
@@ -124,5 +124,17 @@ class Line {
         $canvas_spline.setLayer(this.name, {
             strokeWidth: width
         }).drawLayers();
+    }
+}
+
+class Image{
+    constructor() {
+
+    }
+}
+
+class Text{
+    constructor() {
+
     }
 }

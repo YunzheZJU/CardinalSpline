@@ -40,7 +40,7 @@ $canvas_spline.translateCanvas({
 });
 $canvas_spline.drawImage({
     layer: true,
-    source: 'static/images/image.jpg',
+    source: 'static/images/rocket_1.png',
     opacity: 0.5
 });
 resizeFnBox.push(function () {
@@ -121,13 +121,13 @@ function keyboardEvent(e) {
     else if (e.type === 'keyup') {
         if (e.keyCode === 18) {
             // Alt up
-            msg("Alt is up.");
             alt = false;
+            msg("Alt is up.");
         }
         else if (e.keyCode === 80) {
             // P up. Remove the last point and everything related
             msg("P is up. Popping the last point and everything related.");
-            spline.popPoint();
+            spline.popControlPoint();
         }
     }
 }

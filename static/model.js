@@ -444,7 +444,7 @@ class Spline {
         this.control_points.addControlPoint(x, y, this.grain, this.tension);
     }
 
-    popPoint() {
+    popControlPoint() {
         this.control_points.popPoint(this.grain, this.tension);
         msg("The last point and everything related has been popped.");
     }
@@ -461,7 +461,7 @@ class Spline {
     setAutoDraw(bool) {
         this.auto_draw = bool;
         this.control_points.setAutoDraw(bool);
-        msg("Switch of auto drawing has been set to be "+ bool);
+        msg("Switch of auto drawing has been set to be "+ bool + ".");
     }
 
     setShowDots(bool) {
@@ -472,15 +472,17 @@ class Spline {
         else {
             this.control_points.hideDots();
         }
-        msg("Switch of showing dots has been set to be "+ bool);
+        msg("Switch of showing dots has been set to be "+ bool + ".");
     }
 
-    movePoint(n, x, y) {
+    moveControlPoint(n, x, y) {
         this.control_points.movePoint(n, x, y);
+        msg("A control point has been moved to (" + x + ", " + y + ").")
     }
 
     drawSpline() {
         this.control_points.makeSpline();
+        msg("You have made a new spline!");
     }
 
     setGrain(grain) {
