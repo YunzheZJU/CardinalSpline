@@ -5,20 +5,8 @@
 'use strict';
 let $canvas_spline = $('#splinecanvas');
 let canvas_spline = $canvas_spline[0];
-let $grainhandle = $("#grainhandle");
-let $grainslider = $("#grainslider");
-let $tensionhandle = $("#tensionhandle");
-let $tensionslider = $("#tensionslider");
-let $dotsizeslider = $("#dotsizeslider");
-let $dotsizehandle = $("#dotsizehandle");
-let $linewidthslider = $("#linewidthslider");
-let $linewidthhandle = $("#linewidthhandle");
 let $showdots = $('#showdots');
 let $autodraw = $('#autodraw');
-let $draw = $('#draw');
-let $clear = $('#clear');
-let $play = $('#play');
-let $normalize = $('#normalize');
 let $message = $('#spline-message');
 let move = false;
 let alt = false;
@@ -105,6 +93,7 @@ function mouseEvent(e) {
             msg("Adding a new control point.");
             spline.addControlPoint((e.offsetX - zeroX) / current_scale + offsetX,
                 (e.offsetY - zeroY) / current_scale + offsetY);
+            enableBtns([btnNormalize]);
             msg("A new control point has been added.");
         }
     }
@@ -126,86 +115,95 @@ function keyboardEvent(e) {
         else if (e.keyCode === 80) {
             // P up. Remove the last point and everything related
             msg("P is up. Popping the last point and everything related.");
-            spline.popControlPoint();
+            popControlPoint();
         }
     }
 }
-$draw.click(function (e) {
-    e.preventDefault();
-    spline.drawSpline();
-});
-$normalize.click(function (e) {
-    e.preventDefault();
-    spline.normalizeSpline(NORMALIZE_METHOD_TYPE_1);
-});
-$clear.click(function (e) {
-    e.preventDefault();
+function popControlPoint() {
+    spline.popControlPoint();
+}
+function clearCanvas() {
     spline.removeAll();
-});
-$play.click(function (e) {
-    e.preventDefault();
+    btnNormalize.disable();
+    btnPlay.disable();
+}
+function normalizeSpline(type) {
+    spline.normalizeSpline(type);
+    btnPlay.enable();
+}
+function disableBtns(btn_list) {
+    for (let btn of btn_list) {
+        btn.disable();
+    }
+}
+function enableBtns(btn_list) {
+    for (let btn of btn_list) {
+        btn.enable();
+    }
+}
+class Button {
+    constructor($object, fun) {
+        this.$ = $object;
+        this.$.click(fun);
+    }
+
+    enable() {
+        this.$.removeAttr("disabled");
+    }
+
+    disable() {
+        this.$.attr('disabled', "true");
+    }
+}
+let btnPlay = new Button($('#play'), function () {
     spline.playAnimation();
+    disableBtns([btnDraw, btnNormalize, btnClear, btnPlay]);
 });
+let btnNormalize = new Button($('#normalize'), null);
+let btnDraw = new Button($('#draw'), function () {
+    spline.drawSpline();
+    enableBtns([btnNormalize]);
+    disableBtns([btnPlay]);
+});
+let btnClear = new Button($('#clear'), null);
+disableBtns([btnPlay, btnNormalize]);
 $showdots.change(function () {
     spline.setShowDots($showdots[0].checked);
 });
 $autodraw.change(function () {
     spline.setAutoDraw($autodraw[0].checked);
 });
-$grainslider.slider({
-    range: "min",
-    min: 1,
-    max: 50,
-    value: 20,
-    create: function() {
-        $grainhandle.text($(this).slider("value"));
-    },
-    slide: function( event, ui ) {
-        $grainhandle.text(ui.value);
-        spline.setGrain(parseInt(ui.value));
-    }
-});
-$tensionslider.slider({
-    range: "min",
-    min: 0,
-    max: 1,
-    value: 0.5,
-    step: 0.01,
-    create: function() {
-        $tensionhandle.text($(this).slider("value"));
-    },
-    slide: function( event, ui ) {
-        $tensionhandle.text(ui.value);
-        spline.setTension(parseFloat(ui.value));
-    }
-});
-$dotsizeslider.slider({
-    value: CONTROL_POINT_SIZE_DEFAULT,
-    range: "min",
-    min: 3,
-    max: 20,
-    step: 1,
-    animate: true,
-    create: function() {
-        $dotsizehandle.text($(this).slider("value"));
-    },
-    slide: function (event, ui) {
-        $dotsizehandle.text(ui.value);
-        spline.setDotSize(parseInt(ui.value));
-    }
-});
-$linewidthslider.slider({
-    value: LINE_WIDTH_DEFAULT,
-    range: "min",
-    min: 3,
-    max: 20,
-    step: 1,
-    animate: true,
-    create: function() {
-        $linewidthhandle.text($(this).slider("value"));
-    },
-    slide: function (event, ui) {
-        $linewidthhandle.text(ui.value);
-        spline.setLineWidth(parseInt(ui.value));
-    }
-});
+function initSlider($slider, $handle, min, max, step, value, slideFn) {
+    $slider.slider({
+        range: "min",
+        min: min,
+        max: max,
+        value: value,
+        step: step,
+        animate: true,
+        create: function () {
+            $handle.text($(this).slider("value"));
+        },
+        slide: function (event, ui) {
+            $handle.text(ui.value);
+            slideFn(ui.value);
+        }
+    })
+}
+let sliders = [
+    [$("#grainslider"), $("#grainhandle"), GRAIN_MIN, GRAIN_MAX, 1, GRAIN_DEFAULT, function (value) {
+        spline.setGrain(parseInt(value));
+    }],
+    [$("#tensionslider"), $("#tensionhandle"), TENSION_MIN, TENSION_MAX, 0.01, TENSION_DEFAULT, function (value) {
+        spline.setTension(parseFloat(value));
+    }],
+    [$("#dotsizeslider"), $("#dotsizehandle"), 3, 20, 1, CONTROL_POINT_SIZE_DEFAULT, function (value) {
+        spline.setDotSize(parseInt(value));
+    }],
+    [$("#linewidthslider"), $("#linewidthhandle"), 3, 20, 1, LINE_WIDTH_DEFAULT, function (value) {
+        spline.setLineWidth(parseInt(value));
+    }]
+];
+for (let slider of sliders) {
+    initSlider(slider[0], slider[1], slider[2], slider[3], slider[4], slider[5], slider[6]);
+}

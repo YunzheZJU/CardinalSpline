@@ -7,6 +7,8 @@ const COLORS = ['red', 'blue', 'yellow', 'orange', 'purple', 'green'];
 const ROCKET_SRC_1 = 'static/images/rocket_1.png';
 const ROCKET_SRC_2 = 'static/images/rocket_2.png';
 const NORMALIZE_METHOD_TYPE_1 = 1;
+const NORMALIZE_METHOD_TYPE_2 = 2;
+const NORMALIZE_METHOD_TYPE_3 = 3;
 const GRAIN_DEFAULT = 20;
 const GRAIN_MIN = 1;
 const GRAIN_MAX = 50;
@@ -32,7 +34,7 @@ class Point {
 
 class SplineDots {
     constructor(points, draw) {
-        this.removeAll();
+        SplineDots.removeSplineDots();
         this.dots = points.map(function (point) {
             return new Dot(point, DOT_SIZE_DEFAULT, "rgba(50, 200, 50, 0.8)",
                 "SplinePoint_" + points.indexOf(point), 'SplinePoints', false, draw);
@@ -47,7 +49,11 @@ class SplineDots {
     }
 
     removeAll() {
-        msg("Removing SplinePoints...");
+        msg("Removing SplinePoints...Count: " + this.dots.length);
+        SplineDots.removeSplineDots();
+    }
+
+    static removeSplineDots() {
         $canvas_spline.removeLayerGroup("SplinePoints").drawLayers();
     }
 }
@@ -287,12 +293,17 @@ class CdnSpline {
             this.normalize_method = method;
             msg("Calculating...");
             this.makeLengthList();
+            msg("Length list has been updated.");
             let result = [];
             if (method === NORMALIZE_METHOD_TYPE_1) {
                 let step = 1 / total_frames;
                 for (let i = 1;i < total_frames;i++) {
                     result.push(this.findPointByLength(i * step * this.length));
                 }
+            }
+            else {
+                msg("Unknown method: " + method);
+                return;
             }
             result.push(this.points[this.points.length - 1]);
             result.unshift(this.points[0]);
@@ -362,6 +373,9 @@ class CdnSpline {
             this.time_flow = 0;
             this.playAnimation();
         }
+        else {
+            msg("Please normalize the spline first!");
+        }
     }
 
     updateRocket() {
@@ -398,6 +412,7 @@ class CdnSpline {
     stopAnimation() {
         this.pauseAnimation();
         this.removeRocket();
+        enableBtns([btnDraw, btnNormalize, btnClear, btnPlay]);
     }
 
     pauseAnimation() {
@@ -526,7 +541,7 @@ class ControlPoints {
         this.points = [];
         ControlDots.remove();
         this.control_points_line.remove();
-        if (cdn_spline) {
+        if (this.cdn_spline) {
             this.cdn_spline.removeAll();
         }
     }

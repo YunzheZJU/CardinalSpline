@@ -86,9 +86,28 @@
             </div>
             <div class="mb-3">
                 <button type="button" class="btn btn-primary mt-1" id="draw">绘制曲线</button>
-                <button type="button" class="btn btn-info mt-1" id="normalize">统一插值</button>
+                <!--<button type="button" class="btn btn-info mt-1" id="normalize">统一插值</button>-->
+                <div class="btn-group" role="group">
+                    <button id="normalize" type="button" class="btn btn-info dropdown-toggle mt-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        统一插值
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="normalizeSpline(NORMALIZE_METHOD_TYPE_1);">线性插值（匀速）</a>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="normalizeSpline(NORMALIZE_METHOD_TYPE_2);">线性插值（加速）</a>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="normalizeSpline(NORMALIZE_METHOD_TYPE_3);">非线性插值（加速）</a>
+                    </div>
+                </div>
                 <button type="button" class="btn btn-success mt-1" id="play">开始运动</button>
-                <button type="button" class="btn btn-danger mt-1" id="clear">清空画布</button>
+                <!--<button type="button" class="btn btn-danger mt-1" id="clear">清空画布</button>-->
+                <div class="btn-group" role="group">
+                    <button id="clear" type="button" class="btn btn-danger dropdown-toggle mt-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        清除元素
+                    </button>
+                    <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="popControlPoint();">撤销</a>
+                        <a class="dropdown-item" href="javascript:void(0);" onclick="clearCanvas();">清空画布</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
