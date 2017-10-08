@@ -73,7 +73,6 @@ class Line {
         this.name = name;
         this.strokeStyle = color;
         this.strokeWidth = width;
-        this.groups = ['Lines'];
         this.length = points.length;
         this.intangible = true;
         for (let i = 0;i < points.length;i++) {
@@ -128,8 +127,51 @@ class Line {
 }
 
 class Image{
-    constructor() {
+    constructor(name, src, x, y, width, height, rotate, opacity) {
+        this.layer = true;
+        this.name = name;
+        this.source = src;
+        this.x = x;
+        this.y = y;
+        this.width = width;
+        this.height = height;
+        this.rotate = rotate;
+        this.opacity = opacity;
+    }
 
+    draw() {
+        $canvas_spline.drawImage(this);
+        return this;
+    }
+
+    remove() {
+        $canvas_spline.removeLayer(this.name).drawLayers();
+        return this;
+    }
+
+    update() {
+        this.remove().draw();
+        return this;
+    }
+
+    setImage(src) {
+        this.source = src;
+        this.update();
+    }
+
+    setLocationAndRotate(location, rotate) {
+        // For speed
+        $canvas_spline.setLayer(this.name, {
+            x: location.x,
+            y: location.y,
+            rotate: rotate
+        }).drawLayers();
+    }
+
+    setHeight(height) {
+        $canvas_spline.setLayer(this.name, {
+            height: height
+        }).drawLayers();
     }
 }
 

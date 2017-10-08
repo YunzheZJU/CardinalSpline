@@ -17,7 +17,7 @@ let $showpoints = $('#showpoints');
 let $autodraw = $('#autodraw');
 let $draw = $('#draw');
 let $clear = $('#clear');
-let $run = $('#run');
+let $play = $('#play');
 let $normalize = $('#normalize');
 let $message = $('#spline-message');
 let move = false;
@@ -38,11 +38,8 @@ $canvas_spline.translateCanvas({
     translateX: zeroX,
     translateY: zeroY
 });
-$canvas_spline.drawImage({
-    layer: true,
-    source: 'static/images/rocket_1.png',
-    opacity: 0.5
-});
+let bg_image = new Image('bg', 'static/images/rocket_1.png', 0, 0, 500, 500, 45, 0.5);
+bg_image.draw();
 resizeFnBox.push(function () {
     current_width = canvas_spline.width = window.innerWidth - 30;
     zeroX = current_width / 2;
@@ -137,11 +134,15 @@ $draw.click(function (e) {
 });
 $normalize.click(function (e) {
     e.preventDefault();
-    spline.normalizeSpline();
+    spline.normalizeSpline(NORMALIZE_METHOD_TYPE_1);
 });
 $clear.click(function (e) {
     e.preventDefault();
     spline.removeAll();
+});
+$play.click(function (e) {
+    e.preventDefault();
+    spline.playAnimation();
 });
 $showpoints.change(function () {
     spline.setShowDots($showpoints[0].checked);

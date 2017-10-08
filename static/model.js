@@ -3,7 +3,10 @@
  */
 
 'use strict';
-const colors = ['red', 'blue', 'yellow', 'orange', 'purple', 'green'];
+const COLORS = ['red', 'blue', 'yellow', 'orange', 'purple', 'green'];
+const ROCKET_SRC_1 = 'static/images/rocket_1.png';
+const ROCKET_SRC_2 = 'static/images/rocket_2.png';
+const NORMALIZE_METHOD_TYPE_1 = 1;
 const GRAIN_DEFAULT = 20;
 const GRAIN_MIN = 1;
 const GRAIN_MAX = 50;
@@ -12,8 +15,10 @@ const TENSION_MIN = 0;
 const TENSION_MAX = 1;
 const DOT_SIZE_DEFAULT = 3;
 const LINE_WIDTH_DEFAULT = 3;
-const NORMALIZATION_FACTOR = 100;
+const FRAMES_PER_FRAGMENTS = 48;
 const STEP = 0.1;
+const ANIMATION_FPS = 24;
+const ANIMATION_TIME_INTERVAL = 1000 / ANIMATION_FPS;
 const SHOW_DOTS = true;
 const AUTO_DRAW = true;
 
@@ -60,7 +65,7 @@ class SplinePoints {
     }
 
     removePoints() {
-        this.points = [];
+        // this.points = [];
         this.spline_points_line.remove();
         SplineDots.removeAll();
     }
@@ -69,15 +74,39 @@ class SplinePoints {
         SplineDots.removeAll();
         this.spline_dots.drawSplineDots();
     }
+
+    getPoint(num) {
+        return this.points[num];
+    }
+
+    getPoints() {
+        return this.points;
+    }
+
+    getLength() {
+        return this.points.length;
+    }
 }
 
 class Rocket {
-    constructor() {
+    constructor(src, x, y, width, height, rotate, opacity) {
+        this.image = new Image("Rocket", src, x, y, width, height, rotate, opacity);
+    }
 
+    show() {
+        this.image.draw();
     }
 
     remove() {
+        this.image.remove();
+    }
 
+    updateFrame(location, rotate) {
+        this.image.setLocationAndRotate(location, rotate);
+    }
+
+    setImage(src) {
+        this.image.setImage(src);
     }
 }
 
@@ -88,7 +117,7 @@ class CdnSpline {
         // Array consists of class Point
         this.normalized_spline_points = null;
         // class Rocket
-        this.rocket = new Rocket();
+        this.rocket = null;
 
         this.length_list = [];
         this.length = 0;
@@ -98,34 +127,37 @@ class CdnSpline {
         this.grain = grain;
         this.tension = tension;
         this.show_dots = show;
+        this.normalize_method = null;
+        this.frame = 0;
+        this.frameId = null;
+        this.angle_list = [];
         this.calculateSpline();
     }
 
     combineSegments() {
         msg("Combining segments...");
-        // TODO: Rename alpha
-        let alpha = [];
+        let step = [];
         let result = [];
         for (let i = 0;i < this.grain;i++) {
-            alpha.push(i / this.grain);
+            step.push(i / this.grain);
         }
         for (let i = 1; i < this.points.length - 2; i++) {
             for (let j = 0;j < this.grain;j++) {
                 let x = CdnSpline.makeSegment(this.m, [this.points[i - 1].x, this.points[i].x,
-                    this.points[i + 1].x, this.points[i + 2].x], alpha[j]);
+                    this.points[i + 1].x, this.points[i + 2].x], step[j]);
                 let y = CdnSpline.makeSegment(this.m, [this.points[i - 1].y, this.points[i].y,
-                    this.points[i + 1].y, this.points[i + 2].y], alpha[j]);
+                    this.points[i + 1].y, this.points[i + 2].y], step[j]);
                 result.push(new Point(x, y));
             }
         }
         // Push the last control point into spline_points[].
         result.push(this.points[this.points.length - 1]);
-        if (this.normalized_spline_points !== null) {
-            msg("Unreachable.");
-            msg("Cleaning...");
-            this.normalized_spline_points.removePoints();
-            this.normalized_spline_points = null;
-        }
+        // if (this.normalized_spline_points !== null) {
+        //     msg("Unreachable.");
+        //     msg("Cleaning...");
+        //     this.normalized_spline_points.removePoints();
+        //     this.normalized_spline_points = null;
+        // }
         msg("Generating result...");
         this.points = result;
     }
@@ -237,23 +269,23 @@ class CdnSpline {
         this.length = length;
     }
 
-    normalizeSpline() {
-        if ((this.spline_points === null) && (this.normalized_spline_points === null)) {
+    normalizeSpline(total_frames, method) {
+        if ((this.spline_points === null)) {
             msg("Please make a spline first!");
         }
-        else if (this.spline_points !== null) {
+        else if (this.normalize_method !== method) {
+            this.normalize_method = method;
             msg("Calculating...");
-            // MakeList is OK.
             this.makeLengthList();
-            let step = 1 / NORMALIZATION_FACTOR;
             let result = [];
-            for (let i = 1;i < NORMALIZATION_FACTOR;i++) {
-                result.push(this.findPointByLength(i * step * this.length));
+            if (method === NORMALIZE_METHOD_TYPE_1) {
+                let step = 1 / total_frames;
+                for (let i = 1;i < total_frames;i++) {
+                    result.push(this.findPointByLength(i * step * this.length));
+                }
             }
             result.push(this.points[this.points.length - 1]);
             result.unshift(this.points[0]);
-            this.spline_points.removePoints();
-            this.spline_points = null;
             msg("Generating results...");
             this.normalized_spline_points = new SplinePoints(result, this.show_dots);
             msg("Done. Points have been normalized.");
@@ -280,6 +312,72 @@ class CdnSpline {
         else if (this.normalized_spline_points !== null) {
             this.normalized_spline_points.drawDots();
         }
+    }
+
+    startRocket() {
+        if (this.normalized_spline_points) {
+            // This should be safe
+            this.points = this.normalized_spline_points.getPoints();
+            this.rocket = new Rocket(ROCKET_SRC_1, this.points[0].x, this.points[0].y, 50, 50, 0, 1);
+            for (let i = 0;i < this.points.length - 2;i++) {
+                this.angle_list.push(CdnSpline.calculateAngle(this.points[i], this.points[i + 2]));
+            }
+            this.rocket.show();
+
+            this.then = Date.now();
+            this.time_flow = 0;
+            this.playAnimation();
+        }
+    }
+
+    updateRocket() {
+        if (this.frame + 2 < this.points.length) {
+            this.rocket.updateFrame(this.points[this.frame + 1], this.angle_list[this.frame]);
+            this.frame++;
+        }
+        else {
+            this.stopAnimation();
+            msg("Finished!");
+        }
+    }
+
+    removeRocket() {
+        this.rocket.remove();
+        this.frame = 0;
+        this.angle_list = [];
+    }
+
+    playAnimation() {
+        this.frameId = requestAnimationFrame($.proxy(this.playAnimation, this));
+        let now = Date.now();
+        let delta = now - this.then;
+        // this.time_flow += delta;
+        // msg("Frame: " + this.frame);
+        // msg("Time flow: " + this.time_flow);
+        // msg("Fps: " + (this.frame + 1) / (this.time_flow / 1000));
+        if (delta > ANIMATION_TIME_INTERVAL) {
+            this.then = now - (delta % ANIMATION_TIME_INTERVAL);
+            this.updateRocket();
+        }
+    }
+
+    stopAnimation() {
+        this.pauseAnimation();
+        this.removeRocket();
+    }
+
+    pauseAnimation() {
+        cancelAnimationFrame(this.frameId);
+    }
+
+    stepAnimation() {
+        this.updateRocket();
+    }
+
+    static calculateAngle(previous_point, next_point) {
+        let deltaX = next_point.x - previous_point.x;
+        let deltaY = next_point.y - previous_point.y;
+        return 90 + Math.atan2(deltaY, deltaX) / Math.PI * 180;
     }
 
     static makeSegment(m, n, u) {
@@ -310,7 +408,7 @@ class ControlDots {
     }
 
     addDot(x, y) {
-        this.control_dots.push(new Dot(new Point(x, y), this.dot_size, colors[parseInt(Math.random() * 6)],
+        this.control_dots.push(new Dot(new Point(x, y), this.dot_size, COLORS[parseInt(Math.random() * 6)],
             'ControlPoint_' + (this.control_dots.length), 'ControlPoints', true, true));
     }
 
@@ -377,8 +475,8 @@ class ControlPoints {
         }
     }
 
-    normalizeSpline() {
-        this.cdn_spline.normalizeSpline();
+    normalizeSpline(method) {
+        this.cdn_spline.normalizeSpline((this.points.length - 1) * FRAMES_PER_FRAGMENTS, method);
     }
 
     removeAll() {
@@ -421,6 +519,10 @@ class ControlPoints {
         this.cdn_spline = new CdnSpline(this.points, this.grain, this.tension, this.show_dots);
     }
 
+    playAnimation() {
+        this.cdn_spline.startRocket();
+    }
+
     setGrain(grain) {
         this.grain = grain;
     }
@@ -449,8 +551,8 @@ class Spline {
         msg("The last point and everything related has been popped.");
     }
 
-    normalizeSpline() {
-        this.control_points.normalizeSpline();
+    normalizeSpline(method) {
+        this.control_points.normalizeSpline(method);
     }
 
     removeAll() {
@@ -483,6 +585,11 @@ class Spline {
     drawSpline() {
         this.control_points.makeSpline();
         msg("You have made a new spline!");
+    }
+
+    playAnimation() {
+        msg("Rocket Heart!");
+        this.control_points.playAnimation();
     }
 
     setGrain(grain) {

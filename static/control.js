@@ -62,46 +62,6 @@ let interval = 1000 / fps;
 let delta;
 let frame = 0;
 let animeId;
-function tick() {
-    animeId = requestAnimationFrame(tick);
-    now = Date.now();
-    delta = now - then;
-    if (delta > interval) {
-        then = now - (delta % interval);
-        drawBox();
-    }
-}
-function drawBox() {
-    console.log(frame);
-    if (frame < track_points.length - 1) {
-        frame++;
-        $canvas_spline.setLayer('myBox', {
-            x: track_points[frame].x, y: track_points[frame].y
-        }).drawLayers();
-    }
-    else {
-        cancelAnimationFrame(animeId);
-        $canvas_spline.removeLayer('myBox').drawLayers();
-        msg("End.");
-    }
-}
-$run.click(function (e) {
-    e.preventDefault();
-    if (status === "VIEW") {
-        // TODO
-        track_points = cdn_spline.normalizeSpline(100);
-        console.log(track_points);
-        $canvas_spline.drawRect({
-            layer: true,
-            name: 'myBox',
-            fillStyle: '#36c',
-            x: track_points[0].x, y: track_points[0].y,
-            width: 20, height: 20
-        });
-        msg("Start.");
-        tick();
-    }
-});
 $grain.bind('input', function () {
     let t_grain = parseInt($grain[0].value);
     if (t_grain) {
