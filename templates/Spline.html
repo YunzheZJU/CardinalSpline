@@ -8,76 +8,94 @@
 {% endblock %}
 
 {% block content %}
+<div class="container-fluid">
+    <div class="row">
         <h1>Hello, this is a demo.</h1>
-        <canvas id="splinecanvas" width="1200" height="600" style="border: 1px solid #000000;position: relative;
+    </div>
+    <div class="row align-items-start justify-content-end">
+        <div class="col-5">
+            <div class="col-sm-12 col-md-10 col-lg-8 col-xl-6 mt-5">
+                <div class="card bg-light" style="z-index: 2;">
+                    <h4 class="card-header">
+                        设置
+                    </h4>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            自动绘制曲线
+                            <div class="material-switch pull-right">
+                                <input id="autodraw" name="autodraw" type="checkbox" checked/>
+                                <label for="autodraw" class="bg-success">
+                                </label>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            显示曲线点
+                            <div class="material-switch pull-right">
+                                <input id="showdots" name="showdots" type="checkbox" checked/>
+                                <label for="showdots" class="bg-info">
+                                </label>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            分段数
+                            <!--<input type="text" class="form-control form-control-sm col-sm-2 pull-right" id="grain" placeholder="Grain" value="20">-->
+                            <div id="grainslider" class="col-11 mt-2">
+                                <div id="grainhandle" class="ui-slider-handle"></div>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            张力值
+                            <!--<input type="text" class="form-control form-control-sm col-sm-2 pull-right" id="tension" placeholder="Tension" value="0.5">-->
+                            <div id="tensionslider" class="col-11 mt-2">
+                                <div id="tensionhandle" class="ui-slider-handle"></div>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            控制点大小
+                            <div id="dotsizeslider" class="col-111 mt-2">
+                                <div id="dotsizehandle" class="ui-slider-handle"></div>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            曲线宽度
+                            <div id="linewidthslider" class="col-111 mt-2">
+                                <div id="linewidthhandle" class="ui-slider-handle"></div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        <div class="col-2" id="splinediv">
+            <canvas id="splinecanvas" width="1200" height="800" style="border: 1px solid #000000;position: relative;
         left: 50%;transform: translate(-50%);margin-top:10px">
-            <h1>HTML5 Canvas is not supported in your browser!</h1>
-        </canvas>
-<p id="spline-message">Messages will be shown here.</p>
-        <form class="form-horizontal" role="form">
-            <div style="float: left;" class="col-sm-10">
-                <div class="form-group col-sm-3" style="float: left;">
-                    <label for="grain" class="col-sm-12 control-label">分段数</label>
-                    <div class="col-sm-12">
-                        <input type="text" class="form-control col-sm-4" id="grain" placeholder="Grain" value="20">
-                        <div id="grainslider" style="margin-top: 20px;">
-                            <div id="grainhandle" class="ui-slider-handle"></div>
-                        </div>
+                <h1>HTML5 Canvas is not supported in your browser!</h1>
+            </canvas>
+        </div>
+        <div class="col-3 ml-auto align-self-end">
+            <div class="col-12 mb-3">
+                <div class="card bg-light" style="z-index: 10;">
+                    <div class="card-header">
+                        Notes
                     </div>
-                </div>
-                <div class="form-group col-sm-3" style="float: left;">
-                    <label for="tension" class="col-sm-12 control-label">张力数值</label>
-                    <div class="col-sm-12">
-                        <input type="text" class="form-control col-sm-4" id="tension" placeholder="Tension" value="0.5">
-                        <div id="tensionslider" style="margin-top: 20px;">
-                            <div id="tensionhandle" class="ui-slider-handle"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="form-group col-sm-2 " style="float: left;">
-                    <div class="checkbox col-sm-12">
-                        <label>
-                            <input type="checkbox" id="autodraw" checked>自动重绘曲线
-                        </label>
-                    </div>
-                    <div class="checkbox col-sm-12">
-                        <label>
-                            <input type="checkbox" id="showpoints" checked>显示点列
-                        </label>
+                    <div class="card-body">
+                        <h4 class="card-title">How to use</h4>
+                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
                     </div>
                 </div>
             </div>
-            <div style="float: left; margin-top: 20px;" class="col-sm-1">
-                <div class="form-group">
-                    <div class="col-sm-12">
-                        <button type="submit" class="btn btn-primary" id="draw">绘制曲线</button>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-sm-12">
-                        <button type="submit" class="btn btn-info" id="play">开始运动</button>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-sm-12">
-                        <button type="submit" class="btn btn-danger" id="clear">清除画布</button>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <div class="col-sm-12">
-                        <button type="submit" class="btn btn-light" id="normalize">统一插值</button>
-                    </div>
-                </div>
+            <div class="mb-3">
+                <button type="button" class="btn btn-primary mt-1" id="draw">绘制曲线</button>
+                <button type="button" class="btn btn-info mt-1" id="normalize">统一插值</button>
+                <button type="button" class="btn btn-success mt-1" id="play">开始运动</button>
+                <button type="button" class="btn btn-danger mt-1" id="clear">清空画布</button>
             </div>
-            <div style="float: left; margin-top: 10px;" class="col-sm-1">
-                <div class="form-group col-sm-3" style="float: left;">
-                    <div id="dotsizeslider"></div>
-                </div>
-                <div class="form-group col-sm-3" style="float: left;">
-                    <div id="linewidthslider"></div>
-                </div>
-            </div>
-        </form>
+        </div>
+    </div>
+    <div class="row">
+        <p id="spline-message" class="spline-message">Messages will be shown here.</p>
+    </div>
+</div>
 {% endblock %}
 
 {% block scripts %}

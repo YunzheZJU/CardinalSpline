@@ -5,15 +5,15 @@
 'use strict';
 let $canvas_spline = $('#splinecanvas');
 let canvas_spline = $canvas_spline[0];
-let $grain = $("#grain");
 let $grainhandle = $("#grainhandle");
 let $grainslider = $("#grainslider");
-let $tension = $("#tension");
 let $tensionhandle = $("#tensionhandle");
 let $tensionslider = $("#tensionslider");
 let $dotsizeslider = $("#dotsizeslider");
+let $dotsizehandle = $("#dotsizehandle");
 let $linewidthslider = $("#linewidthslider");
-let $showpoints = $('#showpoints');
+let $linewidthhandle = $("#linewidthhandle");
+let $showdots = $('#showdots');
 let $autodraw = $('#autodraw');
 let $draw = $('#draw');
 let $clear = $('#clear');
@@ -25,9 +25,9 @@ let alt = false;
 let isdragging = false;
 let current_scale = 1;
 let current_width = canvas_spline.width = window.innerWidth - 30;
-const current_height = canvas_spline.height;
+let current_height = canvas_spline.height = window.innerHeight - 150;
 let zeroX = current_width / 2;
-const zeroY = current_height / 2;
+let zeroY = current_height / 2;
 let offsetX = 0;
 let offsetY = 0;
 function msg(msg) {
@@ -42,7 +42,9 @@ let bg_image = new Image('bg', 'static/images/rocket_1.png', 0, 0, 500, 500, 45,
 bg_image.draw();
 resizeFnBox.push(function () {
     current_width = canvas_spline.width = window.innerWidth - 30;
+    current_height = canvas_spline.height = window.innerHeight - 150;
     zeroX = current_width / 2;
+    zeroY = current_height / 2;
     $canvas_spline.translateCanvas({
         translateX: zeroX,
         translateY: zeroY
@@ -144,9 +146,66 @@ $play.click(function (e) {
     e.preventDefault();
     spline.playAnimation();
 });
-$showpoints.change(function () {
-    spline.setShowDots($showpoints[0].checked);
+$showdots.change(function () {
+    spline.setShowDots($showdots[0].checked);
 });
 $autodraw.change(function () {
     spline.setAutoDraw($autodraw[0].checked);
+});
+$grainslider.slider({
+    range: "min",
+    min: 1,
+    max: 50,
+    value: 20,
+    create: function() {
+        $grainhandle.text($(this).slider("value"));
+    },
+    slide: function( event, ui ) {
+        $grainhandle.text(ui.value);
+        spline.setGrain(parseInt(ui.value));
+    }
+});
+$tensionslider.slider({
+    range: "min",
+    min: 0,
+    max: 1,
+    value: 0.5,
+    step: 0.01,
+    create: function() {
+        $tensionhandle.text($(this).slider("value"));
+    },
+    slide: function( event, ui ) {
+        $tensionhandle.text(ui.value);
+        spline.setTension(parseFloat(ui.value));
+    }
+});
+$dotsizeslider.slider({
+    value: CONTROL_POINT_SIZE_DEFAULT,
+    range: "min",
+    min: 3,
+    max: 20,
+    step: 1,
+    animate: true,
+    create: function() {
+        $dotsizehandle.text($(this).slider("value"));
+    },
+    slide: function (event, ui) {
+        $dotsizehandle.text(ui.value);
+        spline.setDotSize(parseInt(ui.value));
+    }
+});
+$linewidthslider.slider({
+    value: LINE_WIDTH_DEFAULT,
+    range: "min",
+    min: 3,
+    max: 20,
+    step: 1,
+    animate: true,
+    create: function() {
+        $linewidthhandle.text($(this).slider("value"));
+    },
+    slide: function (event, ui) {
+        $linewidthhandle.text(ui.value);
+        spline.setLineWidth(parseInt(ui.value));
+    }
 });

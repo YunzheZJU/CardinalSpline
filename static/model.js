@@ -15,6 +15,7 @@ const TENSION_MIN = 0;
 const TENSION_MAX = 1;
 const DOT_SIZE_DEFAULT = 3;
 const LINE_WIDTH_DEFAULT = 3;
+const CONTROL_POINT_SIZE_DEFAULT = 8;
 const FRAMES_PER_FRAGMENTS = 48;
 const STEP = 0.1;
 const ANIMATION_FPS = 24;
@@ -31,7 +32,7 @@ class Point {
 
 class SplineDots {
     constructor(points, draw) {
-        SplineDots.removeAll();
+        this.removeAll();
         this.dots = points.map(function (point) {
             return new Dot(point, DOT_SIZE_DEFAULT, "rgba(50, 200, 50, 0.8)",
                 "SplinePoint_" + points.indexOf(point), 'SplinePoints', false, draw);
@@ -45,14 +46,14 @@ class SplineDots {
         }
     }
 
-    static removeAll() {
+    removeAll() {
         msg("Removing SplinePoints...");
         $canvas_spline.removeLayerGroup("SplinePoints").drawLayers();
     }
 }
 
 class SplinePoints {
-    constructor(points, show_dots) {
+    constructor(points, show_dots, line_width) {
         // Array consists of class Point
         this.points = points;
         // Array consist of class SplineDots
@@ -60,19 +61,23 @@ class SplinePoints {
         this.spline_dots = new SplineDots(points, show_dots);
         // class Line
         msg("Drawing spline...");
-        this.spline_points_line = new Line('rgba(255, 50, 50, 0.6)', LINE_WIDTH_DEFAULT, this.points,
+        this.spline_points_line = new Line('rgba(255, 50, 50, 0.6)', line_width, this.points,
             'SplinePointsLine');
     }
 
     removePoints() {
         // this.points = [];
         this.spline_points_line.remove();
-        SplineDots.removeAll();
+        this.spline_dots.removeAll();
     }
 
     drawDots() {
-        SplineDots.removeAll();
+        this.spline_dots.removeAll();
         this.spline_dots.drawSplineDots();
+    }
+
+    removeDots() {
+        this.spline_dots.removeAll();
     }
 
     getPoint(num) {
@@ -85,6 +90,10 @@ class SplinePoints {
 
     getLength() {
         return this.points.length;
+    }
+
+    setLineWidth(line_width) {
+        this.spline_points_line.setWidth(line_width);
     }
 }
 
@@ -111,7 +120,7 @@ class Rocket {
 }
 
 class CdnSpline {
-    constructor(control_points, grain, tension, show) {
+    constructor(control_points, grain, tension, show, line_width) {
         // class SplinePoints
         this.spline_points = null;
         // Array consists of class Point
@@ -127,6 +136,7 @@ class CdnSpline {
         this.grain = grain;
         this.tension = tension;
         this.show_dots = show;
+        this.line_width = line_width;
         this.normalize_method = null;
         this.frame = 0;
         this.frameId = null;
@@ -183,7 +193,7 @@ class CdnSpline {
         // Combine the segments
         this.combineSegments();
         // Draw the result
-        this.spline_points = new SplinePoints(this.points, this.show_dots);
+        this.spline_points = new SplinePoints(this.points, this.show_dots, this.line_width);
     }
 
     calculateF(u) {
@@ -287,7 +297,7 @@ class CdnSpline {
             result.push(this.points[this.points.length - 1]);
             result.unshift(this.points[0]);
             msg("Generating results...");
-            this.normalized_spline_points = new SplinePoints(result, this.show_dots);
+            this.normalized_spline_points = new SplinePoints(result, this.show_dots, this.line_width);
             msg("Done. Points have been normalized.");
         }
         else {
@@ -296,21 +306,45 @@ class CdnSpline {
     }
 
     removeAll() {
-        this.rocket.remove();
-        if (this.spline_points !== null) {
+        if (this.rocket) {
+            this.rocket.remove();
+        }
+        if (this.spline_points) {
             this.spline_points.removePoints();
         }
-        if (this.normalized_spline_points !== null) {
+        if (this.normalized_spline_points) {
             this.normalized_spline_points.removePoints();
         }
     }
 
     showDots() {
-        if (this.spline_points !== null) {
+        if (this.normalized_spline_points !== null) {
+            this.normalized_spline_points.drawDots();
+        }
+        else if (this.spline_points !== null) {
             this.spline_points.drawDots();
         }
-        else if (this.normalized_spline_points !== null) {
-            this.normalized_spline_points.drawDots();
+    }
+
+    hideDots() {
+        if (this.normalized_spline_points !== null) {
+            this.normalized_spline_points.removeDots();
+        }
+        else if (this.spline_points !== null) {
+            this.spline_points.removeDots();
+        }
+    }
+
+    setShowDots(bool) {
+        this.show_dots = bool;
+    }
+
+    setLineWidth(line_width) {
+        this.line_width = line_width;
+        for (let spline_points of [this.spline_points, this.normalized_spline_points]) {
+            if (spline_points !== null) {
+                spline_points.setLineWidth(line_width);
+            }
         }
     }
 
@@ -402,8 +436,8 @@ class CdnSpline {
 }
 
 class ControlDots {
-    constructor() {
-        this.dot_size = 8;
+    constructor(dot_size) {
+        this.dot_size = dot_size;
         this.control_dots = [];
     }
 
@@ -421,13 +455,20 @@ class ControlDots {
         this.control_dots[n].setLocation(x, y)
     }
 
+    setDotSize(dot_size) {
+        this.dot_size = dot_size;
+        for (let i = 0;i < this.control_dots.length;i++) {
+            this.control_dots[i].setRadius(dot_size);
+        }
+    }
+
     static remove() {
         $canvas_spline.removeLayerGroup("ControlPoints");
     }
 }
 
 class ControlPoints {
-    constructor(grain, tension, auto_draw, show_dots) {
+    constructor(grain, tension, auto_draw, show_dots, dot_size, line_width) {
         // Array of class Point
         this.points = [];
         // class CdnSpline
@@ -435,12 +476,14 @@ class ControlPoints {
         // class Line
         this.control_points_line = null;
         // Array consists of class Dot
-        this.control_dots = new ControlDots();
+        this.control_dots = new ControlDots(dot_size);
 
         this.grain = grain;
         this.tension = tension;
         this.auto_draw = auto_draw;
         this.show_dots = show_dots;
+        this.dot_size = dot_size;
+        this.line_width = line_width;
     }
 
     addControlPoint(x, y) {
@@ -483,7 +526,9 @@ class ControlPoints {
         this.points = [];
         ControlDots.remove();
         this.control_points_line.remove();
-        this.cdn_spline.removeAll();
+        if (cdn_spline) {
+            this.cdn_spline.removeAll();
+        }
     }
 
     setAutoDraw(bool) {
@@ -491,17 +536,23 @@ class ControlPoints {
     }
 
     showDots() {
-        // Take effect at once
-        this.cdn_spline.showDots();
         // Take effect at next draw
         this.show_dots = true;
+        if (this.cdn_spline) {
+            this.cdn_spline.setShowDots(true);
+            // Take effect at once
+            this.cdn_spline.showDots();
+        }
     }
 
     hideDots() {
-        // Take effect at once
-        SplineDots.removeAll();
         // Take effect at next draw
         this.show_dots = false;
+        if (this.cdn_spline) {
+            this.cdn_spline.setShowDots(false);
+            // Take effect at once
+            this.cdn_spline.hideDots();
+        }
     }
 
     movePoint(n, x, y) {
@@ -515,8 +566,10 @@ class ControlPoints {
     }
 
     makeSpline() {
-        msg('Calculating...');
-        this.cdn_spline = new CdnSpline(this.points, this.grain, this.tension, this.show_dots);
+        if (this.points.length > 0) {
+            msg('Calculating...');
+            this.cdn_spline = new CdnSpline(this.points, this.grain, this.tension, this.show_dots, this.line_width);
+        }
     }
 
     playAnimation() {
@@ -530,6 +583,18 @@ class ControlPoints {
     setTension(tension) {
         this.tension = tension;
     }
+
+    setDotSize(dot_size) {
+        this.dot_size = dot_size;
+        this.control_dots.setDotSize(dot_size);
+    }
+
+    setLineWidth(line_width) {
+        this.line_width = line_width;
+        if (this.cdn_spline) {
+            this.cdn_spline.setLineWidth(line_width);
+        }
+    }
 }
 
 class Spline {
@@ -538,8 +603,17 @@ class Spline {
         this.tension = TENSION_DEFAULT;
         this.auto_draw = AUTO_DRAW;
         this.show_dots = SHOW_DOTS;
+        this.dot_size = CONTROL_POINT_SIZE_DEFAULT;
+        this.line_width = LINE_WIDTH_DEFAULT;
         // class ControlPoints
-        this.control_points = new ControlPoints(this.grain, this.tension, this.auto_draw, this.show_dots);
+        this.control_points = null;
+
+        this.initControlPoints();
+    }
+
+    initControlPoints() {
+        this.control_points = new ControlPoints(this.grain, this.tension, this.auto_draw, this.show_dots,
+            this.dot_size, this.line_width);
     }
 
     addControlPoint(x, y) {
@@ -557,24 +631,8 @@ class Spline {
 
     removeAll() {
         this.control_points.removeAll();
-        this.control_points = new ControlPoints(this.grain, this.tension, this.auto_draw, this.show_dots);
-    }
-
-    setAutoDraw(bool) {
-        this.auto_draw = bool;
-        this.control_points.setAutoDraw(bool);
-        msg("Switch of auto drawing has been set to be "+ bool + ".");
-    }
-
-    setShowDots(bool) {
-        this.show_dots = bool;
-        if (bool) {
-            this.control_points.showDots();
-        }
-        else {
-            this.control_points.hideDots();
-        }
-        msg("Switch of showing dots has been set to be "+ bool + ".");
+        this.initControlPoints();
+        msg("The canvas is clear now.");
     }
 
     moveControlPoint(n, x, y) {
@@ -592,15 +650,51 @@ class Spline {
         this.control_points.playAnimation();
     }
 
+    setAutoDraw(bool) {
+        this.auto_draw = bool;
+        this.control_points.setAutoDraw(bool);
+        msg("Switch of auto drawing has been set to be "+ bool + ".");
+    }
+
+    setShowDots(bool) {
+        msg(bool);
+        this.show_dots = bool;
+        if (bool) {
+            this.control_points.showDots();
+        }
+        else {
+            this.control_points.hideDots();
+        }
+        msg("Switch of showing dots has been set to be "+ bool + ".");
+    }
+
     setGrain(grain) {
         this.grain = grain;
         this.control_points.setGrain(grain);
+        if (this.auto_draw) {
+            this.drawSpline();
+        }
         msg("Grain of the Cardinal spline has been set to be "+ grain);
     }
 
     setTension(tension) {
         this.tension = tension;
         this.control_points.setTension(tension);
+        if (this.auto_draw) {
+            this.drawSpline();
+        }
         msg("Tension of the Cardinal spline has been set to be "+ tension);
+    }
+
+    setDotSize(dot_size) {
+        this.dot_size = dot_size;
+        this.control_points.setDotSize(dot_size);
+        msg("Size of the control points has been set to be "+ dot_size);
+    }
+
+    setLineWidth(line_width) {
+        this.line_width = line_width;
+        this.control_points.setLineWidth(line_width);
+        msg("Width of the Cardinal spline has been set to be "+ line_width);
     }
 }
