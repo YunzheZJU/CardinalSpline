@@ -38,14 +38,12 @@
                         </li>
                         <li class="list-group-item">
                             分段数
-                            <!--<input type="text" class="form-control form-control-sm col-sm-2 pull-right" id="grain" placeholder="Grain" value="20">-->
                             <div id="grainslider" class="col-11 mt-2">
                                 <div id="grainhandle" class="ui-slider-handle"></div>
                             </div>
                         </li>
                         <li class="list-group-item">
                             张力值
-                            <!--<input type="text" class="form-control form-control-sm col-sm-2 pull-right" id="tension" placeholder="Tension" value="0.5">-->
                             <div id="tensionslider" class="col-11 mt-2">
                                 <div id="tensionhandle" class="ui-slider-handle"></div>
                             </div>
@@ -80,36 +78,69 @@
         </div>
         <div class="col-4 ml-auto align-self-end">
             <div class="col-12 mb-3">
-                <div class="card bg-light" style="z-index: 10;">
-                    <div class="card-header">
-                        Notes
-                    </div>
+                <div class="card" id="choose-type" hidden>
+                    <h4 class="card-header">
+                        选择一种插补中间帧的方式
+                    </h4>
                     <div class="card-body">
-                        <h4 class="card-title">How to use</h4>
-                        <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
+                        <div class="tab-content" id="pills-tabContent">
+                            <div class="tab-pane fade show active" id="norm-type-1" role="tabpanel" aria-labelledby="norm-type-1-tab">
+                                <img class="card-img" src="{{ url_for('static', filename='images/velocity_line_1.png') }}" alt="Velocity Graph 1">
+                            </div>
+                            <div class="tab-pane fade" id="norm-type-2" role="tabpanel" aria-labelledby="norm-type-2-tab">线性·加速</div>
+                            <div class="tab-pane fade" id="norm-type-3" role="tabpanel" aria-labelledby="norm-type-3-tab">非线性·加速</div>
+                            <div class="tab-pane fade" id="norm-type-4" role="tabpanel" aria-labelledby="norm-type-4-tab">非线性·加速再减速</div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <ul class="nav nav-pills" id="pills-tab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="norm-type-1-tab" data-toggle="pill" href="#norm-type-1" role="tab" aria-controls="norm-type-1" aria-expanded="true">线性·匀速</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="norm-type-2-tab" data-toggle="pill" href="#norm-type-2" role="tab" aria-controls="norm-type-2" aria-expanded="true">线性·加速</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="norm-type-3-tab" data-toggle="pill" href="#norm-type-3" role="tab" aria-controls="norm-type-3" aria-expanded="true">非线性·加速</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="norm-type-4-tab" data-toggle="pill" href="#norm-type-4" role="tab" aria-controls="norm-type-4" aria-expanded="true">非线性·加速再减速</a>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
+            <!--<div class="col-12 col-xl-9 mb-3">-->
+                <!--<div class="card bg-light" style="z-index: 10;">-->
+                    <!--<div class="card-header">-->
+                        <!--Notes-->
+                    <!--</div>-->
+                    <!--<div class="card-body">-->
+                        <!--<h4 class="card-title">How to use</h4>-->
+                        <!--<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>-->
+                    <!--</div>-->
+                <!--</div>-->
+            <!--</div>-->
             <div class="col-6 mb-3 ml-auto mr-auto" id="control-panel" hidden>
-                <!--动画控制panel，平时隐藏，开始运动后显示，结束运动后隐藏-->
                 <div class="btn-group mt-1" role="group" aria-label="Basic example">
                     <button type="button" class="btn btn-success" id="pause-restore">暂停</button>
-                    <button type="button" class="btn btn-success" id="step">步进</button>
+                    <button type="button" class="btn btn-success" id="step" disabled>步进</button>
                     <button type="button" class="btn btn-success" id="stop">停止</button>
                 </div>
             </div>
             <div class="col-12 mb-3">
                 <button type="button" class="btn btn-primary mt-1" id="draw">绘制曲线</button>
-                <div class="btn-group" role="group">
-                    <button id="normalize" type="button" class="btn btn-info dropdown-toggle mt-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
-                        统一插值
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                        <a class="dropdown-item" href="javascript:void(0);" onclick="normalizeSpline(NORMALIZE_METHOD_TYPE_1);">线性插值（匀速）</a>
-                        <a class="dropdown-item" href="javascript:void(0);" onclick="normalizeSpline(NORMALIZE_METHOD_TYPE_2);">线性插值（加速）</a>
-                        <a class="dropdown-item" href="javascript:void(0);" onclick="normalizeSpline(NORMALIZE_METHOD_TYPE_3);">非线性插值（加速）</a>
-                    </div>
-                </div>
+                <button type="button" class="btn btn-info mt-1" id="normalize" disabled>统一插值</button>
+                <!--<div class="btn-group" role="group">-->
+                    <!--<button id="normalize" type="button" class="btn btn-info dropdown-toggle mt-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>-->
+                        <!--统一插值-->
+                    <!--</button>-->
+                    <!--<div class="dropdown-menu" aria-labelledby="btnGroupDrop1">-->
+                        <!--<a class="dropdown-item" href="javascript:void(0);" onclick="normalizeSpline(NORMALIZE_METHOD_TYPE_1);">线性插值（匀速）</a>-->
+                        <!--<a class="dropdown-item" href="javascript:void(0);" onclick="normalizeSpline(NORMALIZE_METHOD_TYPE_2);">线性插值（加速）</a>-->
+                        <!--<a class="dropdown-item" href="javascript:void(0);" onclick="normalizeSpline(NORMALIZE_METHOD_TYPE_3);">非线性插值（加速）</a>-->
+                    <!--</div>-->
+                <!--</div>-->
                 <button type="button" class="btn btn-success mt-1" id="play" disabled>开始运动</button>
                 <div class="btn-group" role="group">
                     <button id="clear" type="button" class="btn btn-danger dropdown-toggle mt-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

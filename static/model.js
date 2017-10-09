@@ -9,6 +9,7 @@ const ROCKET_SRC_2 = 'static/images/rocket_2.png';
 const NORMALIZE_METHOD_TYPE_1 = 1;
 const NORMALIZE_METHOD_TYPE_2 = 2;
 const NORMALIZE_METHOD_TYPE_3 = 3;
+const NORMALIZE_METHOD_TYPE_4 = 4;
 const GRAIN_DEFAULT = 20;
 const GRAIN_MIN = 1;
 const GRAIN_MAX = 50;
@@ -168,12 +169,6 @@ class CdnSpline {
         }
         // Push the last control point into spline_points[].
         result.push(this.points[this.points.length - 1]);
-        // if (this.normalized_spline_points !== null) {
-        //     msg("Unreachable.");
-        //     msg("Cleaning...");
-        //     this.normalized_spline_points.removePoints();
-        //     this.normalized_spline_points = null;
-        // }
         msg("Generating result...");
         this.points = result;
     }
@@ -289,16 +284,32 @@ class CdnSpline {
         if ((this.spline_points === null)) {
             msg("Please make a spline first!");
         }
-        else if (this.normalize_method !== method) {
-            this.normalize_method = method;
+        else {
             msg("Calculating...");
-            this.makeLengthList();
-            msg("Length list has been updated.");
+            if (this.length_list.length === 0) {
+                this.makeLengthList();
+                msg("Length list has been calculated.");
+            }
             let result = [];
+            let step = 1 / total_frames;
             if (method === NORMALIZE_METHOD_TYPE_1) {
-                let step = 1 / total_frames;
                 for (let i = 1;i < total_frames;i++) {
                     result.push(this.findPointByLength(i * step * this.length));
+                }
+            }
+            else if (method === NORMALIZE_METHOD_TYPE_2) {
+                for (let i = 1;i < total_frames;i++) {
+                    result.push(this.findPointByLength(Math.pow(i * step, 2) * this.length));
+                }
+            }
+            else if (method === NORMALIZE_METHOD_TYPE_3) {
+                for (let i = 1;i < total_frames;i++) {
+                    result.push(this.findPointByLength((Math.sin(Math.PI / 2 * (i * step - 1)) + 1) * this.length));
+                }
+            }
+            else if (method === NORMALIZE_METHOD_TYPE_4) {
+                for (let i = 1;i < total_frames;i++) {
+                    result.push(this.findPointByLength((Math.sin(Math.PI * (i * step - 0.5)) + 1) / 2 * this.length));
                 }
             }
             else {
@@ -310,9 +321,6 @@ class CdnSpline {
             msg("Generating results...");
             this.normalized_spline_points = new SplinePoints(result, this.show_dots, this.line_width);
             msg("Done. Points have been normalized.");
-        }
-        else {
-            msg("Click once is OK.");
         }
     }
 
@@ -326,6 +334,7 @@ class CdnSpline {
         if (this.normalized_spline_points) {
             this.normalized_spline_points.removePoints();
         }
+        hideElement($('#choose-type'))
     }
 
     showDots() {
@@ -361,26 +370,27 @@ class CdnSpline {
 
     startRocket() {
         if (this.normalized_spline_points) {
-            // This should be safe
-            this.points = this.normalized_spline_points.getPoints();
-            this.rocket = new Rocket(ROCKET_SRC_1, this.points[0].x, this.points[0].y, 50, 50, 0, 1);
-            for (let i = 0;i < this.points.length - 2;i++) {
-                this.angle_list.push(CdnSpline.calculateAngle(this.points[i], this.points[i + 2]));
+            this.track_points = this.normalized_spline_points.getPoints();
+            this.rocket = new Rocket(ROCKET_SRC_1, this.track_points[0].x, this.track_points[0].y, 50, 50,
+                CdnSpline.calculateAngle(this.track_points[0], this.track_points[2]), 1);
+            for (let i = 0;i < this.track_points.length - 2;i++) {
+                this.angle_list.push(CdnSpline.calculateAngle(this.track_points[i], this.track_points[i + 2]));
             }
             this.rocket.show();
 
             this.then = Date.now();
-            this.time_flow = 0;
             this.playAnimation();
+            return true;
         }
         else {
             msg("Please normalize the spline first!");
+            return false;
         }
     }
 
     updateRocket() {
-        if (this.frame + 2 < this.points.length) {
-            this.rocket.updateFrame(this.points[this.frame + 1], this.angle_list[this.frame]);
+        if (this.frame + 2 < this.track_points.length) {
+            this.rocket.updateFrame(this.track_points[this.frame + 1], this.angle_list[this.frame]);
             this.frame++;
         }
         else {
@@ -412,8 +422,8 @@ class CdnSpline {
     stopAnimation() {
         this.pauseAnimation();
         this.removeRocket();
-        enableBtns([btnDraw, btnNormalize, btnClear, btnPlay]);
-        hideElement($('#control-panel'));
+
+        initPanel();
     }
 
     pauseAnimation() {
@@ -483,141 +493,6 @@ class ControlDots {
     }
 }
 
-class ControlPoints {
-    constructor(grain, tension, auto_draw, show_dots, dot_size, line_width, frame_density) {
-        // Array of class Point
-        this.points = [];
-        // class CdnSpline
-        this.cdn_spline = null;
-        // class Line
-        this.control_points_line = null;
-        // Array consists of class Dot
-        this.control_dots = new ControlDots(dot_size);
-
-        this.grain = grain;
-        this.tension = tension;
-        this.auto_draw = auto_draw;
-        this.show_dots = show_dots;
-        this.dot_size = dot_size;
-        this.line_width = line_width;
-        this.frame_density = frame_density;
-    }
-
-    addControlPoint(x, y) {
-        let point = new Point(x, y);
-        this.points.push(point);
-        this.control_dots.addDot(x, y);
-        if (this.points.length > 1){
-            // Add a new point and create a new Cardinal spline.
-            this.control_points_line.addPoint(point);
-            if (this.auto_draw) {
-                this.makeSpline();
-            }
-        }
-        else {
-            // Initialize control_points_line
-            this.control_points_line = new Line('rgba(100, 100, 150, 0.2)', LINE_WIDTH_DEFAULT, [point],
-                'ControlPointsLine')
-        }
-    }
-
-    popPoint() {
-        if (this.points.length > 0) {
-            this.points.pop();
-            this.control_dots.popDot();
-            this.control_points_line.popPoint();
-            if (this.points.length > 1) {
-                this.makeSpline();
-            }
-            else {
-                this.cdn_spline.removeAll();
-            }
-        }
-    }
-
-    normalizeSpline(method) {
-        this.cdn_spline.normalizeSpline((this.points.length - 1) * this.frame_density, method);
-    }
-
-    removeAll() {
-        this.points = [];
-        ControlDots.remove();
-        this.control_points_line.remove();
-        if (this.cdn_spline) {
-            this.cdn_spline.removeAll();
-        }
-    }
-
-    setAutoDraw(bool) {
-        this.auto_draw = bool;
-    }
-
-    showDots() {
-        // Take effect at next draw
-        this.show_dots = true;
-        if (this.cdn_spline) {
-            this.cdn_spline.setShowDots(true);
-            // Take effect at once
-            this.cdn_spline.showDots();
-        }
-    }
-
-    hideDots() {
-        // Take effect at next draw
-        this.show_dots = false;
-        if (this.cdn_spline) {
-            this.cdn_spline.setShowDots(false);
-            // Take effect at once
-            this.cdn_spline.hideDots();
-        }
-    }
-
-    movePoint(n, x, y) {
-        this.points[n].x = x;
-        this.points[n].y = y;
-        this.makeSpline();
-        this.control_points_line.remove();
-        this.control_points_line = new Line('rgba(100, 100, 150, 0.2)', LINE_WIDTH_DEFAULT, this.points,
-            'ControlPointsLine');
-        this.control_dots.setDotPosition(n, x, y);
-    }
-
-    makeSpline() {
-        if (this.points.length > 0) {
-            msg('Calculating...');
-            this.cdn_spline = new CdnSpline(this.points, this.grain, this.tension, this.show_dots, this.line_width);
-        }
-    }
-
-    playAnimation() {
-        this.cdn_spline.startRocket();
-    }
-
-    setGrain(grain) {
-        this.grain = grain;
-    }
-
-    setTension(tension) {
-        this.tension = tension;
-    }
-
-    setDotSize(dot_size) {
-        this.dot_size = dot_size;
-        this.control_dots.setDotSize(dot_size);
-    }
-
-    setLineWidth(line_width) {
-        this.line_width = line_width;
-        if (this.cdn_spline) {
-            this.cdn_spline.setLineWidth(line_width);
-        }
-    }
-
-    setFrameDensity(frame_density) {
-        this.frame_density = frame_density;
-    }
-}
-
 class Spline {
     constructor() {
         this.grain = GRAIN_DEFAULT;
@@ -627,114 +502,179 @@ class Spline {
         this.dot_size = CONTROL_POINT_SIZE_DEFAULT;
         this.line_width = LINE_WIDTH_DEFAULT;
         this.frame_density = FRAMES_DENSITY_DEFAULT;
-        // class ControlPoints
-        this.control_points = null;
 
-        this.initControlPoints();
-    }
-
-    initControlPoints() {
-        this.control_points = new ControlPoints(this.grain, this.tension, this.auto_draw, this.show_dots,
-            this.dot_size, this.line_width, this.frame_density);
+        // Array of class Point
+        this.control_points = [];
+        // class CdnSpline
+        this.cdn_spline = null;
+        // class Line
+        this.control_points_line = null;
+        // Array consists of class Dot
+        this.control_dots = new ControlDots(this.dot_size);
     }
 
     addControlPoint(x, y) {
-        this.control_points.addControlPoint(x, y, this.grain, this.tension);
+        let point = new Point(x, y);
+        this.control_points.push(point);
+        this.control_dots.addDot(x, y);
+        if (this.control_points.length > 1){
+            // Add a new point and create a new Cardinal spline.
+            this.control_points_line.addPoint(point);
+            if (this.auto_draw) {
+                this.makeSpline();
+                enableBtns([btnNormalize]);
+                showElement($('#choose-type'));
+                disableBtns([btnPlay]);
+            }
+        }
+        else {
+            // Initialize control_points_line
+            this.control_points_line = new Line('rgba(100, 100, 150, 0.2)', LINE_WIDTH_DEFAULT, [point],
+                'ControlPointsLine')
+        }
     }
 
     popControlPoint() {
-        this.control_points.popPoint(this.grain, this.tension);
-        msg("The last point and everything related has been popped.");
+        if (this.control_points.length > 0) {
+            this.control_points.pop();
+            this.control_dots.popDot();
+            this.control_points_line.popPoint();
+            if (this.control_points.length > 1) {
+                this.makeSpline();
+            }
+            else {
+                this.cdn_spline.removeAll();
+            }
+            msg("The last point and everything related has been popped.");
+        }
     }
 
     normalizeSpline(method) {
-        this.control_points.normalizeSpline(method);
+        this.cdn_spline.normalizeSpline((this.control_points.length - 1) * this.frame_density, method);
     }
 
     removeAll() {
-        this.control_points.removeAll();
-        this.initControlPoints();
+        this.control_points = [];
+        ControlDots.remove();
+        this.control_points_line.remove();
+        if (this.cdn_spline) {
+            this.cdn_spline.removeAll();
+        }
         msg("The canvas is clear now.");
-    }
-
-    moveControlPoint(n, x, y) {
-        this.control_points.movePoint(n, x, y);
-        msg("A control point has been moved to (" + x + ", " + y + ").")
-    }
-
-    drawSpline() {
-        this.control_points.makeSpline();
-        msg("You have made a new spline!");
-    }
-
-    playAnimation() {
-        msg("Rocket Heart!");
-        this.control_points.playAnimation();
-    }
-
-    pauseAnimation() {
-
-    }
-
-    restoreAnimation() {
-
-    }
-
-    stopAnimation() {
-
     }
 
     setAutoDraw(bool) {
         this.auto_draw = bool;
-        this.control_points.setAutoDraw(bool);
         msg("Switch of auto drawing has been set to be "+ bool + ".");
     }
 
+    showDots() {
+        if (this.cdn_spline) {
+            this.cdn_spline.setShowDots(true);
+            // Take effect at once
+            this.cdn_spline.showDots();
+        }
+    }
+
+    hideDots() {
+        if (this.cdn_spline) {
+            this.cdn_spline.setShowDots(false);
+            // Take effect at once
+            this.cdn_spline.hideDots();
+        }
+    }
+
     setShowDots(bool) {
-        msg(bool);
         this.show_dots = bool;
         if (bool) {
-            this.control_points.showDots();
+            this.showDots();
         }
         else {
-            this.control_points.hideDots();
+            this.hideDots();
         }
         msg("Switch of showing dots has been set to be "+ bool + ".");
     }
 
+    moveControlPoint(n, x, y) {
+        this.control_points[n].x = x;
+        this.control_points[n].y = y;
+        this.makeSpline();
+        this.control_points_line.remove();
+        this.control_points_line = new Line('rgba(100, 100, 150, 0.2)', LINE_WIDTH_DEFAULT, this.control_points,
+            'ControlPointsLine');
+        this.control_dots.setDotPosition(n, x, y);
+        msg("A control point has been moved to (" + x + ", " + y + ").")
+    }
+
+    makeSpline() {
+        if (this.control_points.length > 0) {
+            msg('Calculating...');
+            this.cdn_spline = new CdnSpline(this.control_points, this.grain, this.tension, this.show_dots, this.line_width);
+            msg("You have made a new spline!");
+        }
+    }
+
+    startAnimation() {
+        msg("Rocket Heart!");
+        return this.cdn_spline.startRocket();
+    }
+
+    pauseAnimation() {
+        this.cdn_spline.pauseAnimation();
+        msg("You have paused the rocket.");
+    }
+
+    restoreAnimation() {
+        this.cdn_spline.playAnimation();
+        msg("Rocket Heart!");
+    }
+
+    stopAnimation() {
+        this.cdn_spline.stopAnimation();
+        msg("The animation has been stopped.");
+    }
+
+    stepAnimation() {
+        this.cdn_spline.stepAnimation();
+        msg("Press \"步进\" button to check next frame.");
+    }
+
     setGrain(grain) {
         this.grain = grain;
-        this.control_points.setGrain(grain);
         if (this.auto_draw) {
-            this.drawSpline();
+            this.makeSpline();
         }
         msg("Grain of the Cardinal spline has been set to be "+ grain);
     }
 
     setTension(tension) {
         this.tension = tension;
-        this.control_points.setTension(tension);
         if (this.auto_draw) {
-            this.drawSpline();
+            this.makeSpline();
         }
         msg("Tension of the Cardinal spline has been set to be "+ tension);
     }
 
     setDotSize(dot_size) {
         this.dot_size = dot_size;
-        this.control_points.setDotSize(dot_size);
+        this.control_dots.setDotSize(dot_size);
         msg("Size of the control points has been set to be "+ dot_size);
     }
 
     setLineWidth(line_width) {
         this.line_width = line_width;
-        this.control_points.setLineWidth(line_width);
+        if (this.cdn_spline) {
+            this.cdn_spline.setLineWidth(line_width);
+        }
         msg("Width of the Cardinal spline has been set to be "+ line_width);
     }
 
-    setFrameDensity(frame_density) {
+    setFrameDensity(frame_density, method) {
         this.frame_density = frame_density;
-        this.control_points.setFrameDensity(frame_density);
+        if (this.cdn_spline && this.auto_draw) {
+            this.cdn_spline.normalizeSpline((this.control_points.length - 1) * this.frame_density, method);
+            enableBtns([btnPlay]);
+        }
         msg("Density of frames has been set to be "+ frame_density);
     }
 }

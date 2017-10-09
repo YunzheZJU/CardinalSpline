@@ -93,7 +93,6 @@ function mouseEvent(e) {
             msg("Adding a new control point.");
             spline.addControlPoint((e.offsetX - zeroX) / current_scale + offsetX,
                 (e.offsetY - zeroY) / current_scale + offsetY);
-            enableBtns([btnNormalize]);
             msg("A new control point has been added.");
         }
     }
@@ -127,10 +126,6 @@ function clearCanvas() {
     btnNormalize.disable();
     btnPlay.disable();
 }
-function normalizeSpline(type) {
-    spline.normalizeSpline(type);
-    btnPlay.enable();
-}
 function disableBtns(btn_list) {
     for (let btn of btn_list) {
         btn.disable();
@@ -160,19 +155,27 @@ class Button {
     disable() {
         this.$.attr('disabled', "true");
     }
+
+    setText(text) {
+        this.$.text(text);
+    }
 }
+let $control_panel = $('#control-panel');
 let btnPlay = new Button($('#play'), function () {
-    spline.playAnimation();
-    disableBtns([btnDraw, btnNormalize, btnClear, btnPlay]);
-    showElement($('#control-panel'));
+    if (spline.startAnimation()) {
+        disableBtns([btnDraw, btnNormalize, btnClear, btnPlay]);
+        showElement($control_panel);
+    }
 });
 let btnPauseRestore = new Button($('#pause-restore'), function () {
     if (this.innerHTML === "暂停") {
         spline.pauseAnimation();
+        enableBtns([btnStep]);
         this.innerHTML = "继续";
     }
     else if (this.innerHTML === "继续") {
         spline.restoreAnimation();
+        disableBtns([btnStep]);
         this.innerHTML = "暂停";
     }
 });
@@ -182,13 +185,41 @@ let btnStop = new Button($('#stop'), function () {
 let btnStep = new Button($('#step'), function () {
     spline.stepAnimation();
 });
-let btnNormalize = new Button($('#normalize'), null);
+let btnNormalize = new Button($('#normalize'), function () {
+    spline.normalizeSpline(getNormType());
+    btnPlay.enable();
+});
 let btnDraw = new Button($('#draw'), function () {
-    spline.drawSpline();
+    spline.makeSpline();
     enableBtns([btnNormalize]);
+    showElement($('#choose-type'));
     disableBtns([btnPlay]);
 });
 let btnClear = new Button($('#clear'), null);
+function initPanel() {
+    btnPauseRestore.setText("暂停");
+    enableBtns([btnDraw, btnNormalize, btnClear, btnPlay]);
+    disableBtns([btnStep]);
+    hideElement($control_panel);
+}
+function getNormType() {
+    let $active_type = $('a.active.nav-link');
+    if ($active_type.attr('id') === "norm-type-1-tab") {
+        return NORMALIZE_METHOD_TYPE_1;
+    }
+    else if ($active_type.attr('id') === "norm-type-2-tab") {
+        return NORMALIZE_METHOD_TYPE_2;
+    }
+    else if ($active_type.attr('id') === "norm-type-3-tab") {
+        return NORMALIZE_METHOD_TYPE_3;
+    }
+    else if ($active_type.attr('id') === "norm-type-4-tab") {
+        return NORMALIZE_METHOD_TYPE_4;
+    }
+    else {
+        return 0;
+    }
+}
 $showdots.change(function () {
     spline.setShowDots($showdots[0].checked);
 });
@@ -226,7 +257,7 @@ let sliders = [
         spline.setLineWidth(parseInt(value));
     }],
     [$("#frameslider"), $("#framehandle"), 5, 50, 1, FRAMES_DENSITY_DEFAULT, function (value) {
-        spline.setFrameDensity(parseInt(value));
+        spline.setFrameDensity(parseInt(value), getNormType());
     }]
 ];
 for (let slider of sliders) {
