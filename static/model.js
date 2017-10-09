@@ -18,7 +18,7 @@ const TENSION_MAX = 1;
 const DOT_SIZE_DEFAULT = 3;
 const LINE_WIDTH_DEFAULT = 3;
 const CONTROL_POINT_SIZE_DEFAULT = 8;
-const FRAMES_PER_FRAGMENTS = 48;
+const FRAMES_DENSITY_DEFAULT = 48;
 const STEP = 0.1;
 const ANIMATION_FPS = 24;
 const ANIMATION_TIME_INTERVAL = 1000 / ANIMATION_FPS;
@@ -413,6 +413,7 @@ class CdnSpline {
         this.pauseAnimation();
         this.removeRocket();
         enableBtns([btnDraw, btnNormalize, btnClear, btnPlay]);
+        hideElement($('#control-panel'));
     }
 
     pauseAnimation() {
@@ -483,7 +484,7 @@ class ControlDots {
 }
 
 class ControlPoints {
-    constructor(grain, tension, auto_draw, show_dots, dot_size, line_width) {
+    constructor(grain, tension, auto_draw, show_dots, dot_size, line_width, frame_density) {
         // Array of class Point
         this.points = [];
         // class CdnSpline
@@ -499,6 +500,7 @@ class ControlPoints {
         this.show_dots = show_dots;
         this.dot_size = dot_size;
         this.line_width = line_width;
+        this.frame_density = frame_density;
     }
 
     addControlPoint(x, y) {
@@ -534,7 +536,7 @@ class ControlPoints {
     }
 
     normalizeSpline(method) {
-        this.cdn_spline.normalizeSpline((this.points.length - 1) * FRAMES_PER_FRAGMENTS, method);
+        this.cdn_spline.normalizeSpline((this.points.length - 1) * this.frame_density, method);
     }
 
     removeAll() {
@@ -610,6 +612,10 @@ class ControlPoints {
             this.cdn_spline.setLineWidth(line_width);
         }
     }
+
+    setFrameDensity(frame_density) {
+        this.frame_density = frame_density;
+    }
 }
 
 class Spline {
@@ -620,6 +626,7 @@ class Spline {
         this.show_dots = SHOW_DOTS;
         this.dot_size = CONTROL_POINT_SIZE_DEFAULT;
         this.line_width = LINE_WIDTH_DEFAULT;
+        this.frame_density = FRAMES_DENSITY_DEFAULT;
         // class ControlPoints
         this.control_points = null;
 
@@ -628,7 +635,7 @@ class Spline {
 
     initControlPoints() {
         this.control_points = new ControlPoints(this.grain, this.tension, this.auto_draw, this.show_dots,
-            this.dot_size, this.line_width);
+            this.dot_size, this.line_width, this.frame_density);
     }
 
     addControlPoint(x, y) {
@@ -663,6 +670,18 @@ class Spline {
     playAnimation() {
         msg("Rocket Heart!");
         this.control_points.playAnimation();
+    }
+
+    pauseAnimation() {
+
+    }
+
+    restoreAnimation() {
+
+    }
+
+    stopAnimation() {
+
     }
 
     setAutoDraw(bool) {
@@ -711,5 +730,11 @@ class Spline {
         this.line_width = line_width;
         this.control_points.setLineWidth(line_width);
         msg("Width of the Cardinal spline has been set to be "+ line_width);
+    }
+
+    setFrameDensity(frame_density) {
+        this.frame_density = frame_density;
+        this.control_points.setFrameDensity(frame_density);
+        msg("Density of frames has been set to be "+ frame_density);
     }
 }

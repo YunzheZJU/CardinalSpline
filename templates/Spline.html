@@ -22,7 +22,7 @@
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item">
                             自动绘制曲线
-                            <div class="material-switch pull-right">
+                            <div class="material-switch float-right">
                                 <input id="autodraw" name="autodraw" type="checkbox" checked/>
                                 <label for="autodraw" class="bg-success">
                                 </label>
@@ -30,7 +30,7 @@
                         </li>
                         <li class="list-group-item">
                             显示曲线点
-                            <div class="material-switch pull-right">
+                            <div class="material-switch float-right">
                                 <input id="showdots" name="showdots" type="checkbox" checked/>
                                 <label for="showdots" class="bg-info">
                                 </label>
@@ -52,14 +52,20 @@
                         </li>
                         <li class="list-group-item">
                             控制点大小
-                            <div id="dotsizeslider" class="col-111 mt-2">
+                            <div id="dotsizeslider" class="col-11 mt-2">
                                 <div id="dotsizehandle" class="ui-slider-handle"></div>
                             </div>
                         </li>
                         <li class="list-group-item">
                             曲线宽度
-                            <div id="linewidthslider" class="col-111 mt-2">
+                            <div id="linewidthslider" class="col-11 mt-2">
                                 <div id="linewidthhandle" class="ui-slider-handle"></div>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            补帧密度
+                            <div id="frameslider" class="col-11 mt-2">
+                                <div id="framehandle" class="ui-slider-handle"></div>
                             </div>
                         </li>
                     </ul>
@@ -72,7 +78,7 @@
                 <h1>HTML5 Canvas is not supported in your browser!</h1>
             </canvas>
         </div>
-        <div class="col-3 ml-auto align-self-end">
+        <div class="col-4 ml-auto align-self-end">
             <div class="col-12 mb-3">
                 <div class="card bg-light" style="z-index: 10;">
                     <div class="card-header">
@@ -84,11 +90,18 @@
                     </div>
                 </div>
             </div>
-            <div class="mb-3">
+            <div class="col-6 mb-3 ml-auto mr-auto" id="control-panel" hidden>
+                <!--动画控制panel，平时隐藏，开始运动后显示，结束运动后隐藏-->
+                <div class="btn-group mt-1" role="group" aria-label="Basic example">
+                    <button type="button" class="btn btn-success" id="pause-restore">暂停</button>
+                    <button type="button" class="btn btn-success" id="step">步进</button>
+                    <button type="button" class="btn btn-success" id="stop">停止</button>
+                </div>
+            </div>
+            <div class="col-12 mb-3">
                 <button type="button" class="btn btn-primary mt-1" id="draw">绘制曲线</button>
-                <!--<button type="button" class="btn btn-info mt-1" id="normalize">统一插值</button>-->
                 <div class="btn-group" role="group">
-                    <button id="normalize" type="button" class="btn btn-info dropdown-toggle mt-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <button id="normalize" type="button" class="btn btn-info dropdown-toggle mt-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
                         统一插值
                     </button>
                     <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
@@ -97,8 +110,7 @@
                         <a class="dropdown-item" href="javascript:void(0);" onclick="normalizeSpline(NORMALIZE_METHOD_TYPE_3);">非线性插值（加速）</a>
                     </div>
                 </div>
-                <button type="button" class="btn btn-success mt-1" id="play">开始运动</button>
-                <!--<button type="button" class="btn btn-danger mt-1" id="clear">清空画布</button>-->
+                <button type="button" class="btn btn-success mt-1" id="play" disabled>开始运动</button>
                 <div class="btn-group" role="group">
                     <button id="clear" type="button" class="btn btn-danger dropdown-toggle mt-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         清除元素

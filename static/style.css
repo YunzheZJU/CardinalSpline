@@ -48,7 +48,7 @@
     user-select: none; /* Non-prefixed version, currently not supported by any browser */
 }
 
-#grainhandle, #tensionhandle, #dotsizehandle, #linewidthhandle {
+#grainhandle, #tensionhandle, #dotsizehandle, #linewidthhandle, #framehandle {
     width: 3em;
     height: 1.6em;
     top: 50%;
@@ -103,10 +103,6 @@
 .material-switch > input[type="checkbox"]:checked + label::after {
     background: inherit;
     left: 20px;
-}
-
-.pull-right {
-    float: right!important;
 }
 
 .spline-message {

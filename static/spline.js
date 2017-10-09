@@ -141,6 +141,12 @@ function enableBtns(btn_list) {
         btn.enable();
     }
 }
+function showElement($element) {
+    $element.removeAttr("hidden");
+}
+function hideElement($element) {
+    $element.attr('hidden', "true");
+}
 class Button {
     constructor($object, fun) {
         this.$ = $object;
@@ -158,6 +164,23 @@ class Button {
 let btnPlay = new Button($('#play'), function () {
     spline.playAnimation();
     disableBtns([btnDraw, btnNormalize, btnClear, btnPlay]);
+    showElement($('#control-panel'));
+});
+let btnPauseRestore = new Button($('#pause-restore'), function () {
+    if (this.innerHTML === "暂停") {
+        spline.pauseAnimation();
+        this.innerHTML = "继续";
+    }
+    else if (this.innerHTML === "继续") {
+        spline.restoreAnimation();
+        this.innerHTML = "暂停";
+    }
+});
+let btnStop = new Button($('#stop'), function () {
+    spline.stopAnimation();
+});
+let btnStep = new Button($('#step'), function () {
+    spline.stepAnimation();
 });
 let btnNormalize = new Button($('#normalize'), null);
 let btnDraw = new Button($('#draw'), function () {
@@ -166,7 +189,6 @@ let btnDraw = new Button($('#draw'), function () {
     disableBtns([btnPlay]);
 });
 let btnClear = new Button($('#clear'), null);
-disableBtns([btnPlay, btnNormalize]);
 $showdots.change(function () {
     spline.setShowDots($showdots[0].checked);
 });
@@ -202,6 +224,9 @@ let sliders = [
     }],
     [$("#linewidthslider"), $("#linewidthhandle"), 3, 20, 1, LINE_WIDTH_DEFAULT, function (value) {
         spline.setLineWidth(parseInt(value));
+    }],
+    [$("#frameslider"), $("#framehandle"), 5, 50, 1, FRAMES_DENSITY_DEFAULT, function (value) {
+        spline.setFrameDensity(parseInt(value));
     }]
 ];
 for (let slider of sliders) {
