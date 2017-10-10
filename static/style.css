@@ -48,6 +48,14 @@
     user-select: none; /* Non-prefixed version, currently not supported by any browser */
 }
 
+#splinecanvas {
+    border: 1px solid #000000;
+    position: relative;
+    left: 50%;
+    transform: translate(-50%);
+    margin-top:10px
+}
+
 #grainhandle, #tensionhandle, #dotsizehandle, #linewidthhandle, #framehandle {
     width: 3em;
     height: 1.6em;
