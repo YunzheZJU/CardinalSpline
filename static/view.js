@@ -174,9 +174,3 @@ class Image{
         }).drawLayers();
     }
 }
-
-class Text{
-    constructor() {
-
-    }
-}

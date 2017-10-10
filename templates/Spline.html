@@ -15,7 +15,7 @@
     <div class="row align-items-start justify-content-end">
         <div class="col-5">
             <div class="col-sm-12 col-md-10 col-lg-8 col-xl-6 mt-5">
-                <div class="card bg-light" style="z-index: 2;">
+                <div class="card border-primary bg-light" style="z-index: 2;">
                     <h4 class="card-header">
                         设置
                     </h4>
@@ -78,18 +78,24 @@
         </div>
         <div class="col-4 ml-auto align-self-end">
             <div class="col-12 mb-3">
-                <div class="card" id="choose-type" hidden>
-                    <h4 class="card-header">
+                <div class="card border-secondary" id="choose-type" hidden>
+                    <h5 class="card-header">
                         选择一种插补中间帧的方式
-                    </h4>
+                    </h5>
                     <div class="card-body">
                         <div class="tab-content" id="pills-tabContent">
                             <div class="tab-pane fade show active" id="norm-type-1" role="tabpanel" aria-labelledby="norm-type-1-tab">
-                                <img class="card-img" src="{{ url_for('static', filename='images/velocity_line_1.png') }}" alt="Velocity Graph 1">
+                                <img class="card-img" src="{{ url_for('static', filename='images/velocity_graph_1.png') }}" alt="Velocity Graph 1">
                             </div>
-                            <div class="tab-pane fade" id="norm-type-2" role="tabpanel" aria-labelledby="norm-type-2-tab">线性·加速</div>
-                            <div class="tab-pane fade" id="norm-type-3" role="tabpanel" aria-labelledby="norm-type-3-tab">非线性·加速</div>
-                            <div class="tab-pane fade" id="norm-type-4" role="tabpanel" aria-labelledby="norm-type-4-tab">非线性·加速再减速</div>
+                            <div class="tab-pane fade" id="norm-type-2" role="tabpanel" aria-labelledby="norm-type-2-tab">
+                                <img class="card-img" src="{{ url_for('static', filename='images/velocity_graph_2.png') }}" alt="Velocity Graph 2">
+                            </div>
+                            <div class="tab-pane fade" id="norm-type-3" role="tabpanel" aria-labelledby="norm-type-3-tab">
+                                <img class="card-img" src="{{ url_for('static', filename='images/velocity_graph_3.png') }}" alt="Velocity Graph 3">
+                            </div>
+                            <div class="tab-pane fade" id="norm-type-4" role="tabpanel" aria-labelledby="norm-type-4-tab">
+                                <img class="card-img" src="{{ url_for('static', filename='images/velocity_graph_4.png') }}" alt="Velocity Graph 4">
+                            </div>
                         </div>
                     </div>
                     <div class="card-footer">
@@ -110,17 +116,6 @@
                     </div>
                 </div>
             </div>
-            <!--<div class="col-12 col-xl-9 mb-3">-->
-                <!--<div class="card bg-light" style="z-index: 10;">-->
-                    <!--<div class="card-header">-->
-                        <!--Notes-->
-                    <!--</div>-->
-                    <!--<div class="card-body">-->
-                        <!--<h4 class="card-title">How to use</h4>-->
-                        <!--<p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>-->
-                    <!--</div>-->
-                <!--</div>-->
-            <!--</div>-->
             <div class="col-6 mb-3 ml-auto mr-auto" id="control-panel" hidden>
                 <div class="btn-group mt-1" role="group" aria-label="Basic example">
                     <button type="button" class="btn btn-success" id="pause-restore">暂停</button>
@@ -131,16 +126,6 @@
             <div class="col-12 mb-3">
                 <button type="button" class="btn btn-primary mt-1" id="draw">绘制曲线</button>
                 <button type="button" class="btn btn-info mt-1" id="normalize" disabled>统一插值</button>
-                <!--<div class="btn-group" role="group">-->
-                    <!--<button id="normalize" type="button" class="btn btn-info dropdown-toggle mt-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>-->
-                        <!--统一插值-->
-                    <!--</button>-->
-                    <!--<div class="dropdown-menu" aria-labelledby="btnGroupDrop1">-->
-                        <!--<a class="dropdown-item" href="javascript:void(0);" onclick="normalizeSpline(NORMALIZE_METHOD_TYPE_1);">线性插值（匀速）</a>-->
-                        <!--<a class="dropdown-item" href="javascript:void(0);" onclick="normalizeSpline(NORMALIZE_METHOD_TYPE_2);">线性插值（加速）</a>-->
-                        <!--<a class="dropdown-item" href="javascript:void(0);" onclick="normalizeSpline(NORMALIZE_METHOD_TYPE_3);">非线性插值（加速）</a>-->
-                    <!--</div>-->
-                <!--</div>-->
                 <button type="button" class="btn btn-success mt-1" id="play" disabled>开始运动</button>
                 <div class="btn-group" role="group">
                     <button id="clear" type="button" class="btn btn-danger dropdown-toggle mt-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -155,7 +140,50 @@
         </div>
     </div>
     <div class="row">
-        <p id="spline-message" class="spline-message">Messages will be shown here.</p>
+        <p id="spline-message" class="spline-message">Hello. Please check the instructions below first.</p>
+    </div>
+    <div class="row">
+        <div class="card-deck mt-3">
+            <div class="card border-info">
+                <div class="card-header">Notes</div>
+                <div class="card-body">
+                    <h4 class="card-title">如何使用（1）</h4>
+                    <p class="card-text">当页面加载完毕后，你可以在画布空白处单击以添加第一个控制点（关键点），随后添加第二个控制点或者按快捷键“P”以撤销刚刚添加的控制点。</p>
+                    <p class="card-text">“自动绘制”和“显示曲线点”是默认开启的，你可以在左侧设置面板关闭它们，而使用右下角的“绘制曲线”按钮手动绘制。</p>
+                    <p class="card-text">你可以调整左侧面板中的分段数等数值来改变你的曲线的外形，当“自动绘制曲线”开关打开时，绘制曲线的操作是同步的。</p>
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted">Last updated 3 days ago</small>
+                </div>
+            </div>
+            <div class="card border-info">
+                <div class="card-header">Notes</div>
+                <div class="card-body">
+                    <h4 class="card-title">如何使用（2）</h4>
+                    <p class="card-text">得到满意的曲线形状后，你可以调整路径曲线插补动画中间帧的补帧密度（平均每两个控制点间的中间帧帧数），并在右侧弹出面板选择一种预设的插补方式。你可以预览所选择的插补方式得到的路程曲线与速度曲线，决定后单击“统一插值”按钮。</p>
+                    <p class="card-text">最后，你就可以播放你的路径关键帧动画了。单击“开始运动”按钮，动画自动开始播放。你可以在弹出的动画控制面板中控制动画的暂停、播放、停止。在暂停状态下，你可以使用“步进”功能来逐帧观看动画。</p>
+                    <p class="card-text">使用“清除元素”按钮下的“清空画布”来删除所有控制点和曲线，重新绘制一条属于你的曲线。</p>
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted">Last updated 3 hours ago</small>
+                </div>
+            </div>
+            <div class="card border-warning">
+                <div class="card-header">Notes</div>
+                <div class="card-body">
+                    <h4 class="card-title">小贴士</h4>
+                    <p class="card-text">1. “补帧密度”影响着即将播放的动画的整体速度。</p>
+                    <p class="card-text">2. 你可以在画布中使用缩放画布（鼠标滚轮）和拖动画布（按住Alt键并拖动空白处）的方式更好地观察曲线。</p>
+                    <p class="card-text">3. 已经绘制的曲线控制点是可以拖动的。但请避免在动画播放过程中改变曲线参数！</p>
+                </div>
+                <div class="card-footer">
+                    <small class="text-muted">Last updated 3 minutes ago</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <p><br /></p>
     </div>
 </div>
 {% endblock %}
