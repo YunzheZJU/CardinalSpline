@@ -1,14 +1,52 @@
-{% extends "base.html" %}
-{% set active_page = "Cardinal Spline" %}
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
-{% block title %}Spline - Assignment 1 of Computer Animation{% endblock %}
+    <title>Spline - Assignment 1 of Computer Animation</title>
 
-{% block head %}
-    <link type="text/css" href="{{ url_for('static', filename='include/jquery-ui.css') }}" rel="stylesheet">
-    <link type="text/css" href="{{ url_for('static', filename='css/spline.css') }}" rel="stylesheet">
-{% endblock %}
+    <link rel="shortcut icon" href="static/icons/favicon_16.ico" type="image/x-icon">
+    <link rel="icon" href="static/icons/favicon.ico" type="image/x-icon">
+    <link type="text/css" href="static/include/bootstrap.css" rel="stylesheet">
+    <link type="text/css" href="static/css/style.css" rel="stylesheet">
+    <link type="text/css" href="static/include/jquery-ui.css" rel="stylesheet">
+    <link type="text/css" href="static/css/spline.css" rel="stylesheet">
 
-{% block content %}
+    <!--[if lt IE 9]>
+    <scripts type="text/scripts" src="/static/include/html5shiv.js"></scripts>
+    <scripts type="text/scripts" src="/static/include/respond.js"></scripts>
+    <![endif]-->
+</head>
+<body>
+    <div id="header">
+        <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+            <a class="navbar-brand" href="#">Computer Animation</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <ul class="navbar-nav mr-auto">
+                    
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">Cardinal Spline</a>
+                    </li>
+                    
+
+                </ul>
+                <form class="form-inline mt-2 mt-md-0">
+                    <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
+                    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                </form>
+            </div>
+        </nav>
+    </div>
+    <div id="content">
+        <div id="div-effect">
+            <canvas id="canvas-effect">
+            </canvas>
+        </div>
         <div class="container-fluid">
             <div class="row">
                 <h1>Hello, this is a demo.</h1>
@@ -85,16 +123,16 @@
                             <div class="card-body">
                                 <div class="tab-content" id="pills-tabContent">
                                     <div class="tab-pane fade show active" id="norm-type-1" role="tabpanel" aria-labelledby="norm-type-1-tab">
-                                        <img class="card-img" src="{{ url_for('static', filename='images/velocity_graph_1.png') }}" alt="Velocity Graph 1">
+                                        <img class="card-img" src="static/images/velocity_graph_1.png" alt="Velocity Graph 1">
                                     </div>
                                     <div class="tab-pane fade" id="norm-type-2" role="tabpanel" aria-labelledby="norm-type-2-tab">
-                                        <img class="card-img" src="{{ url_for('static', filename='images/velocity_graph_2.png') }}" alt="Velocity Graph 2">
+                                        <img class="card-img" src="static/images/velocity_graph_2.png" alt="Velocity Graph 2">
                                     </div>
                                     <div class="tab-pane fade" id="norm-type-3" role="tabpanel" aria-labelledby="norm-type-3-tab">
-                                        <img class="card-img" src="{{ url_for('static', filename='images/velocity_graph_3.png') }}" alt="Velocity Graph 3">
+                                        <img class="card-img" src="static/images/velocity_graph_3.png" alt="Velocity Graph 3">
                                     </div>
                                     <div class="tab-pane fade" id="norm-type-4" role="tabpanel" aria-labelledby="norm-type-4-tab">
-                                        <img class="card-img" src="{{ url_for('static', filename='images/velocity_graph_4.png') }}" alt="Velocity Graph 4">
+                                        <img class="card-img" src="static/images/velocity_graph_4.png" alt="Velocity Graph 4">
                                     </div>
                                 </div>
                             </div>
@@ -188,12 +226,19 @@
                 <p><br /></p>
             </div>
         </div>
-{% endblock %}
+    </div>
+    <div id="footer">
+        　　&copy; Copyright 2017 by Yunzhe.
+        </div>
 
-{% block scripts %}
-    <script type="text/javascript" src="{{ url_for('static', filename='include/jquery-ui.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='include/jcanvas.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='scripts/model.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='scripts/view.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='scripts/spline.js') }}"></script>
-{% endblock %}
+    <script type="text/javascript" src="static/include/jquery.js"></script>
+    <script type="text/javascript" src="static/include/popper.js"></script>
+    <script type="text/javascript" src="static/include/bootstrap.js"></script>
+    <script type="text/javascript" src="static/scripts/effect.js"></script>
+    <script type="text/javascript" src="static/include/jquery-ui.js"></script>
+    <script type="text/javascript" src="static/include/jcanvas.js"></script>
+    <script type="text/javascript" src="static/scripts/model.js"></script>
+    <script type="text/javascript" src="static/scripts/view.js"></script>
+    <script type="text/javascript" src="static/scripts/spline.js"></script>
+</body>
+</html>
