@@ -1,11 +1,11 @@
 /**
  * Created by Yunzhe on 2017/10/1.
+ * Classes related with the spline structure are defined here.
  */
 
 'use strict';
 const COLORS = ['red', 'blue', 'yellow', 'orange', 'purple', 'green'];
-const ROCKET_SRC_1 = 'static/images/rocket_1.png';
-const ROCKET_SRC_2 = 'static/images/rocket_2.png';
+const ROCKET_SRC = 'static/images/rocket_1.png';
 const NORMALIZE_METHOD_TYPE_1 = 1;
 const NORMALIZE_METHOD_TYPE_2 = 2;
 const NORMALIZE_METHOD_TYPE_3 = 3;
@@ -20,7 +20,7 @@ const DOT_SIZE_DEFAULT = 3;
 const LINE_WIDTH_DEFAULT = 3;
 const CONTROL_POINT_SIZE_DEFAULT = 8;
 const FRAMES_DENSITY_DEFAULT = 24;
-const STEP = 0.1;
+const SEARCH_STEP = 0.1;
 const ANIMATION_FPS = 24;
 const ANIMATION_TIME_INTERVAL = 1000 / ANIMATION_FPS;
 const SHOW_DOTS = true;
@@ -87,16 +87,8 @@ class SplinePoints {
         this.spline_dots.removeAll();
     }
 
-    getPoint(num) {
-        return this.points[num];
-    }
-
     getPoints() {
         return this.points;
-    }
-
-    getLength() {
-        return this.points.length;
     }
 
     setLineWidth(line_width) {
@@ -120,10 +112,6 @@ class Rocket {
     updateFrame(location, rotate) {
         this.image.setLocationAndRotate(location, rotate);
     }
-
-    setImage(src) {
-        this.image.setImage(src);
-    }
 }
 
 class CdnSpline {
@@ -144,7 +132,6 @@ class CdnSpline {
         this.tension = tension;
         this.show_dots = show;
         this.line_width = line_width;
-        this.normalize_method = null;
         this.frame = 0;
         this.frameId = null;
         this.angle_list = [];
@@ -260,7 +247,7 @@ class CdnSpline {
             else {
                 u_max = u_current;
             }
-        } while (Math.abs(difference_length) > STEP);
+        } while (Math.abs(difference_length) > SEARCH_STEP);
         return new Point(CdnSpline.calculatePoint(u_current, param_list[0]),
             CdnSpline.calculatePoint(u_current, param_list[1]))
     }
@@ -273,7 +260,8 @@ class CdnSpline {
         // Duplicate the first point
         this.points.unshift(this.points[0]);
         for (let i = 0;i < this.points.length - 3;i++) {
-            this.calculateCoefficient(this.m, [this.points[i], this.points[i + 1], this.points[i + 2], this.points[i + 3]]);
+            this.calculateCoefficient(this.m,
+                [this.points[i], this.points[i + 1], this.points[i + 2], this.points[i + 3]]);
             length += this.calculateSimpsonLength(0, 1);
             this.length_list.push(length);
         }
@@ -334,7 +322,7 @@ class CdnSpline {
         if (this.normalized_spline_points) {
             this.normalized_spline_points.removePoints();
         }
-        hideElement($('#choose-type'))
+        hideElement($chooseType)
     }
 
     showDots() {
@@ -371,7 +359,7 @@ class CdnSpline {
     startRocket() {
         if (this.normalized_spline_points) {
             this.track_points = this.normalized_spline_points.getPoints();
-            this.rocket = new Rocket(ROCKET_SRC_1, this.track_points[0].x, this.track_points[0].y, 50, 50,
+            this.rocket = new Rocket(ROCKET_SRC, this.track_points[0].x, this.track_points[0].y, 50, 50,
                 CdnSpline.calculateAngle(this.track_points[0], this.track_points[2]), 1);
             for (let i = 0;i < this.track_points.length - 2;i++) {
                 this.angle_list.push(CdnSpline.calculateAngle(this.track_points[i], this.track_points[i + 2]));
@@ -409,10 +397,6 @@ class CdnSpline {
         this.frameId = requestAnimationFrame($.proxy(this.playAnimation, this));
         let now = Date.now();
         let delta = now - this.then;
-        // this.time_flow += delta;
-        // msg("Frame: " + this.frame);
-        // msg("Time flow: " + this.time_flow);
-        // msg("Fps: " + (this.frame + 1) / (this.time_flow / 1000));
         if (delta > ANIMATION_TIME_INTERVAL) {
             this.then = now - (delta % ANIMATION_TIME_INTERVAL);
             this.updateRocket();
@@ -522,9 +506,6 @@ class Spline {
             this.control_points_line.addPoint(point);
             if (this.auto_draw) {
                 this.makeSpline();
-                enableBtns([btnNormalize]);
-                showElement($('#choose-type'));
-                disableBtns([btnPlay]);
             }
         }
         else {
@@ -610,6 +591,7 @@ class Spline {
         if (this.control_points.length > 0) {
             msg('Calculating...');
             this.cdn_spline = new CdnSpline(this.control_points, this.grain, this.tension, this.show_dots, this.line_width);
+            showPanel();
             msg("You have made a new spline!");
         }
     }

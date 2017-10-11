@@ -3,7 +3,6 @@
  */
 
 'use strict';
-// TODO: classfy and add avoid()
 let cursor_show = false;
 let isrunning = false;
 let cursor_r_min = 30;
@@ -115,7 +114,7 @@ window.requestAnimationFrame = window.requestAnimationFrame || window.mozRequest
     || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
 window.cancelAnimationFrame = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
 
-let canvas_effect = $('#effectcanvas')[0];
+let canvas_effect = $('#canvas-effect')[0];
 let ctx = canvas_effect.getContext('2d');
 let w = canvas_effect.width = canvas_effect.offsetWidth;
 let h = canvas_effect.height = canvas_effect.offsetHeight;

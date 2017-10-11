@@ -1,13 +1,16 @@
 /**
  * Created by Yunzhe on 2017/10/4.
+ * This script file controls the spline app.
  */
 
 'use strict';
+let spline = new Spline();
 let $canvas_spline = $('#splinecanvas');
 let canvas_spline = $canvas_spline[0];
 let $showdots = $('#showdots');
 let $autodraw = $('#autodraw');
 let $message = $('#spline-message');
+let $chooseType = $('#choose-type');
 let move = false;
 let alt = false;
 let isdragging = false;
@@ -191,9 +194,6 @@ let btnNormalize = new Button($('#normalize'), function () {
 });
 let btnDraw = new Button($('#draw'), function () {
     spline.makeSpline();
-    enableBtns([btnNormalize]);
-    showElement($('#choose-type'));
-    disableBtns([btnPlay]);
 });
 let btnClear = new Button($('#clear'), null);
 function initPanel() {
@@ -201,6 +201,11 @@ function initPanel() {
     enableBtns([btnDraw, btnNormalize, btnClear, btnPlay]);
     disableBtns([btnStep]);
     hideElement($control_panel);
+}
+function showPanel() {
+    enableBtns([btnNormalize]);
+    showElement($chooseType);
+    disableBtns([btnPlay]);
 }
 function getNormType() {
     let $active_type = $('a.active.nav-link');

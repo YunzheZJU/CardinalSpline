@@ -1,5 +1,6 @@
 /**
  * Created by Yunzhe on 2017/10/1.
+ * Classes interacting with JCanvas are defined here.
  */
 
 'use strict';

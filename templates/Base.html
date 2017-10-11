@@ -7,25 +7,24 @@
 
     <title>{% block title %}{% endblock %}</title>
 
-    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon_16.ico') }}" type="image/x-icon">
-    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-    <link type="text/css" href="{{ url_for('static', filename='bootstrap.min.css') }}" rel="stylesheet">
-    <link type="text/css" href="{{ url_for('static', filename='jquery-ui.css') }}" rel="stylesheet">
-    <link type="text/css" href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='icons/favicon_16.ico') }}" type="image/x-icon">
+    <link rel="icon" href="{{ url_for('static', filename='icons/favicon.ico') }}" type="image/x-icon">
+    <link type="text/css" href="{{ url_for('static', filename='include/bootstrap.css') }}" rel="stylesheet">
+    <link type="text/css" href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
     {%- block head %}{% endblock %}
     <!--[if lt IE 9]>
-    <script type="text/javascript" src="{{ url_for('static', filename='html5shiv.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='respond.min.js') }}"></script>
+    <scripts type="text/scripts" src="{{ url_for('static', filename='include/html5shiv.js') }}"></scripts>
+    <scripts type="text/scripts" src="{{ url_for('static', filename='include/respond.js') }}"></scripts>
     <![endif]-->
 </head>
 <body>
     <div id="header">
-        {% set navigation_bar = [
-        ('demo', 'CA: Spline')
-        ] -%}
+        {%- set navigation_bar = [
+        ('demo', 'Cardinal Spline')
+        ] %}
         {% set active_page = active_page|default('index') -%}
         <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-            <a class="navbar-brand" href="#">CallHub</a>
+            <a class="navbar-brand" href="#">Computer Animation</a>
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -46,23 +45,23 @@
         </nav>
     </div>
     <div id="content">
-        <div id="effect">
-            <canvas id="effectcanvas">
+        <div id="div-effect">
+            <canvas id="canvas-effect">
             </canvas>
         </div>
-        {%- block content %}{%- endblock %}
+        {%- block content %}{% endblock %}
     </div>
-    <div id="footer" style="z-index: 5;">
+    <div id="footer">
         {%- block footer %}
         　　&copy; Copyright 2017 by Yunzhe.
-        {%- endblock %}
+        {% endblock -%}
     </div>
 
-    <script type="text/javascript" src="{{ url_for('static', filename='jquery-3.2.1.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='popper.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='bootstrap.min.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='jquery-ui.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='effect.js') }}"></script>
-    {%- block scripts %}{%- endblock %}
+    <script type="text/javascript" src="{{ url_for('static', filename='include/jquery.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='include/popper.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='include/bootstrap.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='include/jquery-ui.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts/effect.js') }}"></script>
+    {%- block scripts %}{% endblock -%}
 </body>
 </html>

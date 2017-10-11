@@ -1,200 +1,198 @@
 {% extends "base.html" %}
-{% set active_page = "CA: Spline" %}
+{% set active_page = "Cardinal Spline" %}
 
-{% block title %}{% endblock %}
+{% block title %}Spline - Assignment 1 of Computer Animation{% endblock %}
 
 {% block head %}
-
+    <link type="text/css" href="{{ url_for('static', filename='include/jquery-ui.css') }}" rel="stylesheet">
+    <link type="text/css" href="{{ url_for('static', filename='css/spline.css') }}" rel="stylesheet">
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <h1>Hello, this is a demo.</h1>
-    </div>
-    <div class="row align-items-start justify-content-end">
-        <div class="col-5">
-            <div class="col-sm-12 col-md-10 col-lg-8 col-xl-6 mt-5">
-                <div class="card border-primary bg-light" style="z-index: 2;">
-                    <h4 class="card-header">
-                        设置
-                    </h4>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">
-                            自动绘制曲线
-                            <div class="material-switch float-right">
-                                <input id="autodraw" name="autodraw" type="checkbox" checked/>
-                                <label for="autodraw" class="bg-success">
-                                </label>
-                            </div>
-                        </li>
-                        <li class="list-group-item">
-                            显示曲线点
-                            <div class="material-switch float-right">
-                                <input id="showdots" name="showdots" type="checkbox" checked/>
-                                <label for="showdots" class="bg-info">
-                                </label>
-                            </div>
-                        </li>
-                        <li class="list-group-item">
-                            分段数
-                            <div id="grainslider" class="col-11 mt-2">
-                                <div id="grainhandle" class="ui-slider-handle"></div>
-                            </div>
-                        </li>
-                        <li class="list-group-item">
-                            张力值
-                            <div id="tensionslider" class="col-11 mt-2">
-                                <div id="tensionhandle" class="ui-slider-handle"></div>
-                            </div>
-                        </li>
-                        <li class="list-group-item">
-                            控制点大小
-                            <div id="dotsizeslider" class="col-11 mt-2">
-                                <div id="dotsizehandle" class="ui-slider-handle"></div>
-                            </div>
-                        </li>
-                        <li class="list-group-item">
-                            曲线宽度
-                            <div id="linewidthslider" class="col-11 mt-2">
-                                <div id="linewidthhandle" class="ui-slider-handle"></div>
-                            </div>
-                        </li>
-                        <li class="list-group-item">
-                            补帧密度
-                            <div id="frameslider" class="col-11 mt-2">
-                                <div id="framehandle" class="ui-slider-handle"></div>
-                            </div>
-                        </li>
-                    </ul>
-                </div>
+        <div class="container-fluid">
+            <div class="row">
+                <h1>Hello, this is a demo.</h1>
             </div>
-        </div>
-        <div class="col-2" id="splinediv">
-            <canvas id="splinecanvas" width="1200" height="800">
-                <h1>HTML5 Canvas is not supported in your browser!</h1>
-            </canvas>
-        </div>
-        <div class="col-4 ml-auto align-self-end">
-            <div class="col-12 mb-3">
-                <div class="card border-secondary" id="choose-type" hidden>
-                    <h5 class="card-header">
-                        选择一种插补中间帧的方式
-                    </h5>
-                    <div class="card-body">
-                        <div class="tab-content" id="pills-tabContent">
-                            <div class="tab-pane fade show active" id="norm-type-1" role="tabpanel" aria-labelledby="norm-type-1-tab">
-                                <img class="card-img" src="{{ url_for('static', filename='images/velocity_graph_1.png') }}" alt="Velocity Graph 1">
+            <div class="row align-items-start justify-content-end">
+                <div class="col-5">
+                    <div class="col-sm-12 col-md-10 col-lg-8 col-xl-6 mt-5">
+                        <div class="card border-primary bg-light z-index-2">
+                            <h4 class="card-header">
+                                设置
+                            </h4>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                    自动绘制曲线
+                                    <div class="material-switch float-right">
+                                        <input id="autodraw" name="autodraw" type="checkbox" checked/>
+                                        <label for="autodraw" class="bg-success">
+                                        </label>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    显示曲线点
+                                    <div class="material-switch float-right">
+                                        <input id="showdots" name="showdots" type="checkbox" checked/>
+                                        <label for="showdots" class="bg-info">
+                                        </label>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    分段数
+                                    <div id="grainslider" class="col-11 mt-2">
+                                        <div id="grainhandle" class="ui-slider-handle"></div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    张力值
+                                    <div id="tensionslider" class="col-11 mt-2">
+                                        <div id="tensionhandle" class="ui-slider-handle"></div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    控制点大小
+                                    <div id="dotsizeslider" class="col-11 mt-2">
+                                        <div id="dotsizehandle" class="ui-slider-handle"></div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    曲线宽度
+                                    <div id="linewidthslider" class="col-11 mt-2">
+                                        <div id="linewidthhandle" class="ui-slider-handle"></div>
+                                    </div>
+                                </li>
+                                <li class="list-group-item">
+                                    补帧密度
+                                    <div id="frameslider" class="col-11 mt-2">
+                                        <div id="framehandle" class="ui-slider-handle"></div>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-2" id="splinediv">
+                    <canvas id="splinecanvas" width="1200" height="800">
+                        <h1>HTML5 Canvas is not supported in your browser!</h1>
+                    </canvas>
+                </div>
+                <div class="col-4 ml-auto align-self-end">
+                    <div class="col-12 mb-3">
+                        <div class="card border-secondary" id="choose-type" hidden>
+                            <h5 class="card-header">
+                                选择一种插补中间帧的方式
+                            </h5>
+                            <div class="card-body">
+                                <div class="tab-content" id="pills-tabContent">
+                                    <div class="tab-pane fade show active" id="norm-type-1" role="tabpanel" aria-labelledby="norm-type-1-tab">
+                                        <img class="card-img" src="{{ url_for('static', filename='images/velocity_graph_1.png') }}" alt="Velocity Graph 1">
+                                    </div>
+                                    <div class="tab-pane fade" id="norm-type-2" role="tabpanel" aria-labelledby="norm-type-2-tab">
+                                        <img class="card-img" src="{{ url_for('static', filename='images/velocity_graph_2.png') }}" alt="Velocity Graph 2">
+                                    </div>
+                                    <div class="tab-pane fade" id="norm-type-3" role="tabpanel" aria-labelledby="norm-type-3-tab">
+                                        <img class="card-img" src="{{ url_for('static', filename='images/velocity_graph_3.png') }}" alt="Velocity Graph 3">
+                                    </div>
+                                    <div class="tab-pane fade" id="norm-type-4" role="tabpanel" aria-labelledby="norm-type-4-tab">
+                                        <img class="card-img" src="{{ url_for('static', filename='images/velocity_graph_4.png') }}" alt="Velocity Graph 4">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="tab-pane fade" id="norm-type-2" role="tabpanel" aria-labelledby="norm-type-2-tab">
-                                <img class="card-img" src="{{ url_for('static', filename='images/velocity_graph_2.png') }}" alt="Velocity Graph 2">
-                            </div>
-                            <div class="tab-pane fade" id="norm-type-3" role="tabpanel" aria-labelledby="norm-type-3-tab">
-                                <img class="card-img" src="{{ url_for('static', filename='images/velocity_graph_3.png') }}" alt="Velocity Graph 3">
-                            </div>
-                            <div class="tab-pane fade" id="norm-type-4" role="tabpanel" aria-labelledby="norm-type-4-tab">
-                                <img class="card-img" src="{{ url_for('static', filename='images/velocity_graph_4.png') }}" alt="Velocity Graph 4">
+                            <div class="card-footer">
+                                <ul class="nav nav-pills" id="pills-tab" role="tablist">
+                                    <li class="nav-item">
+                                        <a class="nav-link active" id="norm-type-1-tab" data-toggle="pill" href="#norm-type-1" role="tab" aria-controls="norm-type-1" aria-expanded="true">线性·匀速</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="norm-type-2-tab" data-toggle="pill" href="#norm-type-2" role="tab" aria-controls="norm-type-2" aria-expanded="true">线性·加速</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="norm-type-3-tab" data-toggle="pill" href="#norm-type-3" role="tab" aria-controls="norm-type-3" aria-expanded="true">非线性·加速</a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link" id="norm-type-4-tab" data-toggle="pill" href="#norm-type-4" role="tab" aria-controls="norm-type-4" aria-expanded="true">非线性·加速再减速</a>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer">
-                        <ul class="nav nav-pills" id="pills-tab" role="tablist">
-                            <li class="nav-item">
-                                <a class="nav-link active" id="norm-type-1-tab" data-toggle="pill" href="#norm-type-1" role="tab" aria-controls="norm-type-1" aria-expanded="true">线性·匀速</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="norm-type-2-tab" data-toggle="pill" href="#norm-type-2" role="tab" aria-controls="norm-type-2" aria-expanded="true">线性·加速</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="norm-type-3-tab" data-toggle="pill" href="#norm-type-3" role="tab" aria-controls="norm-type-3" aria-expanded="true">非线性·加速</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" id="norm-type-4-tab" data-toggle="pill" href="#norm-type-4" role="tab" aria-controls="norm-type-4" aria-expanded="true">非线性·加速再减速</a>
-                            </li>
-                        </ul>
+                    <div class="col-6 mb-3 ml-auto mr-auto" id="control-panel" hidden>
+                        <div class="btn-group mt-1" role="group" aria-label="Basic example">
+                            <button type="button" class="btn btn-success" id="pause-restore">暂停</button>
+                            <button type="button" class="btn btn-success" id="step" disabled>步进</button>
+                            <button type="button" class="btn btn-success" id="stop">停止</button>
+                        </div>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <button type="button" class="btn btn-primary mt-1" id="draw">绘制曲线</button>
+                        <button type="button" class="btn btn-info mt-1" id="normalize" disabled>统一插值</button>
+                        <button type="button" class="btn btn-success mt-1" id="play" disabled>开始运动</button>
+                        <div class="btn-group" role="group">
+                            <button id="clear" type="button" class="btn btn-danger dropdown-toggle mt-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                清除元素
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                                <a class="dropdown-item" href="javascript:void(0);" onclick="popControlPoint();">撤销</a>
+                                <a class="dropdown-item" href="javascript:void(0);" onclick="clearCanvas();">清空画布</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-6 mb-3 ml-auto mr-auto" id="control-panel" hidden>
-                <div class="btn-group mt-1" role="group" aria-label="Basic example">
-                    <button type="button" class="btn btn-success" id="pause-restore">暂停</button>
-                    <button type="button" class="btn btn-success" id="step" disabled>步进</button>
-                    <button type="button" class="btn btn-success" id="stop">停止</button>
-                </div>
+            <div class="row">
+                <p id="spline-message" class="spline-message">Hello. Please check the instructions below first.</p>
             </div>
-            <div class="col-12 mb-3">
-                <button type="button" class="btn btn-primary mt-1" id="draw">绘制曲线</button>
-                <button type="button" class="btn btn-info mt-1" id="normalize" disabled>统一插值</button>
-                <button type="button" class="btn btn-success mt-1" id="play" disabled>开始运动</button>
-                <div class="btn-group" role="group">
-                    <button id="clear" type="button" class="btn btn-danger dropdown-toggle mt-1" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        清除元素
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
-                        <a class="dropdown-item" href="javascript:void(0);" onclick="popControlPoint();">撤销</a>
-                        <a class="dropdown-item" href="javascript:void(0);" onclick="clearCanvas();">清空画布</a>
+            <div class="row">
+                <div class="card-deck mt-3">
+                    <div class="card border-info">
+                        <div class="card-header">Notes</div>
+                        <div class="card-body">
+                            <h4 class="card-title">如何使用（1）</h4>
+                            <p class="card-text">当页面加载完毕后，你可以在画布空白处单击以添加第一个控制点（关键点），随后添加第二个控制点或者按快捷键“P”以撤销刚刚添加的控制点。</p>
+                            <p class="card-text">“自动绘制”和“显示曲线点”是默认开启的，你可以在左侧设置面板关闭它们，而使用右下角的“绘制曲线”按钮手动绘制。</p>
+                            <p class="card-text">你可以调整左侧面板中的分段数等数值来改变你的曲线的外形，当“自动绘制曲线”开关打开时，绘制曲线的操作是同步的。</p>
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted">Last updated 3 days ago</small>
+                        </div>
+                    </div>
+                    <div class="card border-info">
+                        <div class="card-header">Notes</div>
+                        <div class="card-body">
+                            <h4 class="card-title">如何使用（2）</h4>
+                            <p class="card-text">得到满意的曲线形状后，你可以调整路径曲线插补动画中间帧的补帧密度（平均每两个控制点间的中间帧帧数），并在右侧弹出面板选择一种预设的插补方式。你可以预览所选择的插补方式得到的路程曲线与速度曲线，决定后单击“统一插值”按钮。</p>
+                            <p class="card-text">最后，你就可以播放你的路径关键帧动画了。单击“开始运动”按钮，动画自动开始播放。你可以在弹出的动画控制面板中控制动画的暂停、播放、停止。在暂停状态下，你可以使用“步进”功能来逐帧观看动画。</p>
+                            <p class="card-text">使用“清除元素”按钮下的“清空画布”来删除所有控制点和曲线，重新绘制一条属于你的曲线。</p>
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted">Last updated 3 hours ago</small>
+                        </div>
+                    </div>
+                    <div class="card border-warning">
+                        <div class="card-header">Notes</div>
+                        <div class="card-body">
+                            <h4 class="card-title">小贴士</h4>
+                            <p class="card-text">1. “补帧密度”影响着即将播放的动画的整体速度。</p>
+                            <p class="card-text">2. 你可以在画布中使用缩放画布（鼠标滚轮）和拖动画布（按住Alt键并拖动空白处）的方式更好地观察曲线。</p>
+                            <p class="card-text">3. 已经绘制的曲线控制点是可以拖动的。但请避免在动画播放过程中改变曲线参数！</p>
+                            <p class="card-text">4. 为了快速缩放至想要观察的区域，请将鼠标指针移动到远离目标区域的位置，向后滚动鼠标滚轮，再将鼠标指针移动到目标区域，向前滚动鼠标滚轮。</p>
+                            <p class="card-text">5. 页面元素与浏览器窗口大小是适配的，但是请确保至少720px的可视高度来获得最佳的视觉体验，并使用一个现代浏览器来支持全部功能。
+                        </div>
+                        <div class="card-footer">
+                            <small class="text-muted">Last updated 3 minutes ago</small>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <div class="row">
-        <p id="spline-message" class="spline-message">Hello. Please check the instructions below first.</p>
-    </div>
-    <div class="row">
-        <div class="card-deck mt-3">
-            <div class="card border-info">
-                <div class="card-header">Notes</div>
-                <div class="card-body">
-                    <h4 class="card-title">如何使用（1）</h4>
-                    <p class="card-text">当页面加载完毕后，你可以在画布空白处单击以添加第一个控制点（关键点），随后添加第二个控制点或者按快捷键“P”以撤销刚刚添加的控制点。</p>
-                    <p class="card-text">“自动绘制”和“显示曲线点”是默认开启的，你可以在左侧设置面板关闭它们，而使用右下角的“绘制曲线”按钮手动绘制。</p>
-                    <p class="card-text">你可以调整左侧面板中的分段数等数值来改变你的曲线的外形，当“自动绘制曲线”开关打开时，绘制曲线的操作是同步的。</p>
-                </div>
-                <div class="card-footer">
-                    <small class="text-muted">Last updated 3 days ago</small>
-                </div>
-            </div>
-            <div class="card border-info">
-                <div class="card-header">Notes</div>
-                <div class="card-body">
-                    <h4 class="card-title">如何使用（2）</h4>
-                    <p class="card-text">得到满意的曲线形状后，你可以调整路径曲线插补动画中间帧的补帧密度（平均每两个控制点间的中间帧帧数），并在右侧弹出面板选择一种预设的插补方式。你可以预览所选择的插补方式得到的路程曲线与速度曲线，决定后单击“统一插值”按钮。</p>
-                    <p class="card-text">最后，你就可以播放你的路径关键帧动画了。单击“开始运动”按钮，动画自动开始播放。你可以在弹出的动画控制面板中控制动画的暂停、播放、停止。在暂停状态下，你可以使用“步进”功能来逐帧观看动画。</p>
-                    <p class="card-text">使用“清除元素”按钮下的“清空画布”来删除所有控制点和曲线，重新绘制一条属于你的曲线。</p>
-                </div>
-                <div class="card-footer">
-                    <small class="text-muted">Last updated 3 hours ago</small>
-                </div>
-            </div>
-            <div class="card border-warning">
-                <div class="card-header">Notes</div>
-                <div class="card-body">
-                    <h4 class="card-title">小贴士</h4>
-                    <p class="card-text">1. “补帧密度”影响着即将播放的动画的整体速度。</p>
-                    <p class="card-text">2. 你可以在画布中使用缩放画布（鼠标滚轮）和拖动画布（按住Alt键并拖动空白处）的方式更好地观察曲线。</p>
-                    <p class="card-text">3. 已经绘制的曲线控制点是可以拖动的。但请避免在动画播放过程中改变曲线参数！</p>
-                    <p class="card-text">4. 为了快速缩放至想要观察的区域，请将鼠标指针移动到远离目标区域的位置，向后滚动鼠标滚轮，再将鼠标指针移动到目标区域，向前滚动鼠标滚轮。</p>
-                    <p class="card-text">5. 页面元素与浏览器窗口大小是适配的，但是请确保至少720px的可视高度来获得最佳的视觉体验，并使用一个现代浏览器来支持全部功能。
-                </div>
-                <div class="card-footer">
-                    <small class="text-muted">Last updated 3 minutes ago</small>
-                </div>
+            <div class="row">
+                <p><br /></p>
             </div>
         </div>
-    </div>
-    <div class="row">
-        <p><br /></p>
-    </div>
-</div>
 {% endblock %}
 
 {% block scripts %}
-    <script type="text/javascript" src="{{ url_for('static', filename='jcanvas.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='model.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='view.js') }}"></script>
-    <script type="text/javascript" src="{{ url_for('static', filename='spline.js') }}"></script>
-<script>
-    let spline = new Spline();
-</script>
+    <script type="text/javascript" src="{{ url_for('static', filename='include/jcanvas.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts/model.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts/view.js') }}"></script>
+    <script type="text/javascript" src="{{ url_for('static', filename='scripts/spline.js') }}"></script>
 {% endblock %}
